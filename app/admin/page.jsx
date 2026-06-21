@@ -332,6 +332,29 @@ export default function AdminCalendarPage() {
                 <label>Morada do Serviço</label>
                 <div className="detail-val">{selectedBooking.address}</div>
                 <div className="detail-subval">{selectedBooking.postal_code}, {selectedBooking.city}</div>
+                
+                <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ flex: 1, padding: '6px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                    onClick={() => {
+                      const query = encodeURIComponent(`${selectedBooking.address}, ${selectedBooking.postal_code}, ${selectedBooking.city}, Portugal`);
+                      window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+                    }}
+                  >
+                    📍 Google Maps
+                  </button>
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ flex: 1, padding: '6px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                    onClick={() => {
+                      const query = encodeURIComponent(`${selectedBooking.address}, ${selectedBooking.postal_code}, ${selectedBooking.city}, Portugal`);
+                      window.open(`https://waze.com/ul?q=${query}`, '_blank');
+                    }}
+                  >
+                    🚗 Waze
+                  </button>
+                </div>
               </div>
 
               <div className="detail-grid">
