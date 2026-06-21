@@ -289,15 +289,35 @@ export default function AdminCalendarPage() {
                       className="event-block shadow-sm"
                       style={{ 
                         top: `${topPercentage}px`, 
-                        height: `${Math.max(60, heightPx)}px`,
+                        height: `${Math.max(70, heightPx)}px`, // Increased minimum height slightly to fit the badge
                         backgroundColor: colors[colorIdx],
-                        borderLeft: `4px solid ${borderColors[colorIdx]}`
+                        borderLeft: `4px solid ${borderColors[colorIdx]}`,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between'
                       }}
                       onClick={() => setSelectedBooking(booking)}
                     >
-                      <div className="event-title">{booking.customer_name}</div>
-                      <div className="event-time">{booking.service_time} ({durationMins} min)</div>
-                      <div className="event-meta">📍 {booking.city}</div>
+                      <div>
+                        <div className="event-title">{booking.customer_name}</div>
+                        <div className="event-time">{booking.time_slot || booking.service_time} ({durationMins} min)</div>
+                      </div>
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '4px' }}>
+                        <div className="event-meta">📍 {booking.postal_code || booking.city}</div>
+                        
+                        {/* Payment Method Badge */}
+                        <div style={{ 
+                          fontSize: '0.7rem', 
+                          fontWeight: '700', 
+                          padding: '2px 6px', 
+                          borderRadius: '4px',
+                          backgroundColor: 'rgba(0,0,0,0.05)',
+                          color: borderColors[colorIdx]
+                        }}>
+                          {booking.payment_method || 'A Confirmar'}
+                        </div>
+                      </div>
                     </div>
                   );
                 })}
