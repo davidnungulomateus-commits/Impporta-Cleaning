@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "description": "Impporta Landing Page",
   "scripts": {
-    "dev": "vite --port 3000",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000"
   },
-  "devDependencies": {
-    "vite": "^5.0.0"
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
+    "next": "^16.2.9",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   }
 }
