@@ -40,7 +40,7 @@ export default function Navbar() {
           </button>
           <div className="user-dropdown-content">
             <Link href="/dashboard">O meu Painel</Link>
-            {isAdmin && <Link href="#admin" style={{ color: 'var(--accent-color)' }}>Painel Admin</Link>}
+            {isAdmin && <Link href="/admin" style={{ color: 'var(--accent-color)' }}>Painel Admin</Link>}
             <a href="#" onClick={handleLogout}>Sair</a>
           </div>
         </div>
