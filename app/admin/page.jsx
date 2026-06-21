@@ -164,6 +164,10 @@ export default function AdminCalendarPage() {
 
   return (
     <main className="admin-wrapper bg-alt">
+      <style dangerouslySetInnerHTML={{ __html: `
+        .navbar, footer { display: none !important; }
+        body { margin: 0; padding: 0; }
+      `}} />
       
       {/* Top Navbar for Admin */}
       <nav className="admin-navbar">
