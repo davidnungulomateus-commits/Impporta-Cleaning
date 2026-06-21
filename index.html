@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Impporta - Especialistas em Limpeza de Vidros e Janelas</title>
+  <meta name="description" content="A Impporta oferece serviços profissionais de limpeza de vidros e janelas para residências, escritórios e supermercados." />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="#" class="nav-brand">
+        <img src="./logo.svg" alt="Impporta Logo" />
+      </a>
+      <ul class="nav-menu">
+        <li><a href="#services" class="nav-link">O Que Fazemos</a></li>
+        <li><a href="#process" class="nav-link">Como Funciona</a></li>
+        <li><a href="#calculator" class="nav-link">Simulador</a></li>
+        <li><a href="#calendar" class="nav-link">Agendamento</a></li>
+        <li><a href="./about.html" class="nav-link">Quem Somos</a></li>
+      </ul>
+      <div class="nav-actions" id="nav-actions-container">
+        <a href="./auth.html" id="nav-auth-btn" class="btn btn-outline" style="display: none;">Entrar</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section id="hero" class="hero fade-up">
+    <div class="container">
+      <h1>Limpeza <span class="text-secondary">personalizada</span> de vidros e janelas</h1>
+      <p>Sinta a diferença com a Impporta — onde a transparência, o brilho e a sua tranquilidade vêm em primeiro lugar. Garantimos vidros impecáveis e seguros para o seu ambiente.</p>
+      <div class="hero-buttons">
+        <a href="#calculator" class="btn btn-primary">Agendar Já</a>
+        <button id="support-btn" class="btn btn-outline">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+          Apoiar a Impporta
+        </button>
+      </div>
+      
+      <div class="stats">
+        <div class="stat-item fade-up" style="display: flex; flex-direction: column; align-items: center; max-width: 650px; margin: 0 auto;">
+          <div class="counter-container" style="position: relative; display: inline-block;">
+            <h3><span id="customer-count-val">0</span><span class="text-secondary">+</span></h3>
+          </div>
+          <p class="stat-label">Clientes que nos apoiam</p>
+          <p class="stat-dream-quote">"Somos uma equipa nova e jovem, mas carregamos o grande sonho de nos tornarmos a empresa número um em limpeza de vidros e janelas. A nossa dedicação e vontade de trabalhar são honestas e infinitas!"</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What We Do (Services) -->
+  <section id="services" class="services">
+    <div class="container">
+      <div class="section-header fade-up">
+        <h2>O Que Fazemos</h2>
+        <p>Somos especializados exclusivamente em limpeza de vidros e janelas. Garantimos máxima transparência, brilho e segurança para diferentes tipos de ambientes.</p>
+      </div>
+      
+      <div class="services-grid">
+        <div class="service-card fade-up">
+          <div class="service-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          </div>
+          <h3>Limpeza de Vidros Residencial</h3>
+          <p>Deixamos as janelas e sacadas da sua casa ou apartamento perfeitamente limpas e sem marcas, trazendo mais luz e harmonia para o seu lar.</p>
+        </div>
+        <div class="service-card fade-up" style="transition-delay: 0.1s;">
+          <div class="service-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          </div>
+          <h3>Limpeza de Vidros para Escritórios</h3>
+          <p>Mantenha a fachada e as divisórias de vidro da sua empresa impecáveis, garantindo uma imagem profissional e um ambiente de trabalho produtivo.</p>
+        </div>
+        <div class="service-card fade-up" style="transition-delay: 0.2s;">
+          <div class="service-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          </div>
+          <h3>Limpeza de Vidros para Supermercados e Shoppings</h3>
+          <p>Garantimos vidros extremamente limpos em montras de shoppings, balcões refrigerados e portas de entrada de supermercados, valorizando a apresentação e visibilidade dos seus produtos.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works (Process) -->
+  <section id="process" class="process">
+    <div class="container">
+      <div class="section-header fade-up">
+        <span style="text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); font-weight: 600; margin-bottom: 8px; display: block;">Como Funciona</span>
+        <h2>O Nosso Processo Simples para Vidros Impecáveis</h2>
+        <p>Acreditamos que contratar um serviço profissional de limpeza de janelas deve ser rápido e descomplicado. Veja os nossos passos simples:</p>
+      </div>
+
+      <div class="process-steps">
+        <div class="process-step fade-up">
+          <div class="process-image step-1"></div>
+          <div class="process-content">
+            <div class="step-number">1</div>
+            <h3>Insira o Número de Janelas</h3>
+            <p>Informe a quantidade de vidros e janelas que deseja limpar no nosso simulador abaixo para ver instantaneamente a sua poupança e preços.</p>
+            <a href="#calculator" class="btn btn-outline">Simular Agora</a>
+          </div>
+        </div>
+        <div class="process-step fade-up">
+          <div class="process-image step-2"></div>
+          <div class="process-content">
+            <div class="step-number">2</div>
+            <h3>Escolha e Agende</h3>
+            <p>Selecione o tipo de ambiente (residência, escritório, supermercado ou shopping) e reserve o horário ideal. Certifique-se de estar em casa no dia agendado para receber o profissional.</p>
+            <a href="#calendar" class="btn btn-outline">Ir para o Calendário</a>
+          </div>
+        </div>
+        <div class="process-step fade-up">
+          <div class="process-image step-3"></div>
+          <div class="process-content">
+            <div class="step-number">3</div>
+            <h3>Pagamento Flexível</h3>
+            <p>Realize o pagamento de forma simples e 100% segura pelo nosso sistema online ou, se preferir, efetue o pagamento diretamente em mãos ao nosso profissional no dia da limpeza.</p>
+          </div>
+        </div>
+        <div class="process-step fade-up">
+          <div class="process-image step-4"></div>
+          <div class="process-content">
+            <div class="step-number">4</div>
+            <h3>Vidros Brilhantes</h3>
+            <p>A nossa equipa desloca-se até si e realiza a limpeza de vidros no dia marcado. Não precisa de se preocupar com nada!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Calculator Section -->
+  <section id="calculator" class="calculator-section fade-up">
+    <div class="container">
+      <div class="section-header">
+        <h2>Simulador de Preço</h2>
+        <p>Insira a quantidade de janelas/vidros e veja em tempo real quanto economiza ao escolher o nosso serviço especializado!</p>
+      </div>
+
+      <div class="calculator-box">
+        <div class="calculator-inputs">
+          <div class="input-group">
+            <label for="window-range" class="input-label-highlight" style="font-size: 1.35rem; color: var(--primary); text-transform: uppercase; letter-spacing: 0.02em;">
+              👉 Insira aqui o número de janelas a limpar: 
+              <span id="window-count-display" class="highlight-val" style="font-size: 1.5rem; padding: 6px 18px;">4</span>
+            </label>
+            <div class="slider-wrapper" style="margin-top: 16px;">
+              <input type="range" id="window-range" min="1" max="100" value="4" class="window-slider" />
+              <input type="number" id="window-number" min="1" max="100" value="4" class="window-number-input" />
+            </div>
+            
+            <!-- Window Counting Guide -->
+            <div class="window-counting-info" style="margin-top: 20px; background-color: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; font-size: 0.9rem; text-align: left; box-shadow: var(--shadow-sm);">
+              <strong style="color: var(--text-main); display: block; margin-bottom: 10px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                Como contamos as janelas?
+              </strong>
+              <p style="color: var(--text-muted); line-height: 1.5; margin: 0 0 10px 0;">
+                Cobramos por <strong>janela/estrutura completa</strong> e não por painéis ou divisórias internas. Veja como deve contar:
+              </p>
+              <ul style="color: var(--text-muted); margin: 0; padding-left: 20px; line-height: 1.6;">
+                <li style="margin-bottom: 8px;"><strong>Moldura única com divisões:</strong> Se a sua janela ou porta possui vários vidros separados por divisórias (de metal ou madeira), mas está toda contida em <strong>uma única moldura principal</strong>, conta como apenas <strong>1 janela</strong>.</li>
+                <li style="margin-bottom: 8px;"><strong>Janelas de duas partes (guilhotina ou correr):</strong> Se possui uma janela dividida em duas partes estruturais independentes (ex: uma parte móvel que abre/desliza e uma parte fixa, ou uma parte superior e outra inferior), cada parte conta como <strong>1 janela</strong> (total de 2).</li>
+                <li style="margin-bottom: 0;"><strong>Montras ou Paredes de Vidro:</strong> Em fachadas comerciais ou paredes cobertas de vidro, cada painel individual delimitado pela sua própria estrutura/caixilho conta como <strong>1 janela</strong>.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-wrapper-vertical">
+          <div class="chart-column competitor">
+            <div class="column-track">
+              <div id="bar-competitor" class="column-fill" style="height: 0%;"><span>€40</span></div>
+            </div>
+            <div class="column-label">Média Concorrência<br>(€10/janela)</div>
+          </div>
+
+          <div class="chart-column regular">
+            <div class="column-track">
+              <div id="bar-regular" class="column-fill" style="height: 0%;"><span>€28</span></div>
+            </div>
+            <div class="column-label">Preço Regular<br>(€7/janela)</div>
+          </div>
+
+          <div class="chart-column discount">
+            <div class="column-track">
+              <div id="bar-discount" class="column-fill" style="height: 0%;"><span>€16</span></div>
+            </div>
+            <div class="column-label">O Seu Preço (Oferta!)<br>(€4/janela)</div>
+          </div>
+        </div>
+
+        <div class="savings-callout">
+          <h3>Total a Pagar: <span id="total-pay-val" class="text-secondary">€16</span></h3>
+          <p>Você economiza <strong id="savings-val" style="color: var(--secondary);">€24</strong> em relação à concorrência ao aproveitar a oferta da primeira limpeza!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Calendar Section -->
+  <section id="calendar" class="calendar-section fade-up">
+    <div class="container">
+      <div class="calendar-box">
+        <div class="calendar-header">
+          <h2>Agendamento Online</h2>
+          <p>Reserve o seu horário de forma rápida e 100% online.</p>
+        </div>
+        
+        <!-- Booking Progress Bar -->
+        <div class="booking-progress">
+          <div class="progress-step active" id="p-step-1">1. Data e Hora</div>
+          <div class="progress-step" id="p-step-2">2. Detalhes e Morada</div>
+          <div class="progress-step" id="p-step-3">3. Pagamento</div>
+          <div class="progress-step" id="p-step-4">4. Confirmação</div>
+        </div>
+
+        <div class="booking-steps-container">
+          <!-- Step 1: Calendar and Slots -->
+          <div class="booking-step-content active" id="booking-step-1-el">
+            <div class="calendar-flex">
+              <div class="calendar-widget">
+                <div class="calendar-month-header">
+                  <button type="button" id="prev-month-btn" class="btn-icon">&lt;</button>
+                  <span id="calendar-month-year">Julho 2026</span>
+                  <button type="button" id="next-month-btn" class="btn-icon">&gt;</button>
+                </div>
+                <div class="calendar-weekdays">
+                  <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                </div>
+                <div class="calendar-days-grid" id="calendar-days">
+                  <!-- Days injected by JS -->
+                </div>
+              </div>
+              <div class="time-slots-widget">
+                <h3>Horários Disponíveis</h3>
+                <p class="select-day-prompt" id="select-day-prompt">Por favor, selecione uma data no calendário.</p>
+                <div class="time-slots-grid" id="time-slots" style="display: none;">
+                  <button type="button" class="time-slot-btn" data-time="09:00">09:00</button>
+                  <button type="button" class="time-slot-btn" data-time="10:30">10:30</button>
+                  <button type="button" class="time-slot-btn" data-time="12:00">12:00</button>
+                  <button type="button" class="time-slot-btn" data-time="14:00">14:00</button>
+                  <button type="button" class="time-slot-btn" data-time="15:30">15:30</button>
+                  <button type="button" class="time-slot-btn" data-time="17:00">17:00</button>
+                </div>
+                <div id="slot-summary-box" class="slot-summary-box" style="display: none;">
+                  <p>Duração estimada: <strong id="calc-duration-text">8 minutos</strong></p>
+                  <p>Horário: <strong id="calc-time-range">14:00 às 14:08</strong></p>
+                </div>
+              </div>
+            </div>
+            <div class="step-actions" style="margin-top: 32px; display: flex; justify-content: flex-end;">
+              <button type="button" id="next-to-step-2" class="btn btn-primary" disabled>Continuar</button>
+            </div>
+          </div>
+
+          <!-- Step 2: Address and Contact details -->
+          <div class="booking-step-content" id="booking-step-2-el" style="display: none;">
+            
+            <div class="google-auth-container" style="margin-top: 24px; text-align: center; padding-bottom: 24px; border-bottom: 1px solid var(--border);">
+              <button type="button" id="google-login-btn" class="btn btn-outline" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                Preencher rapidamente com Google
+              </button>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">(Opcional) A forma mais rápida de preencher os seus dados.</p>
+            </div>
+
+            <form id="details-form" class="details-form" style="margin-top: 24px;">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cust-name">Nome Completo *</label>
+                  <input type="text" id="cust-name" required placeholder="Ex: João Silva" class="form-input-field" />
+                </div>
+                <div class="form-group">
+                  <label for="cust-email">Email</label>
+                  <input type="email" id="cust-email" placeholder="Ex: joao@email.com" class="form-input-field" />
+                </div>
+              </div>
+              <div class="form-group" style="margin-top: 16px;">
+                <label for="cust-phone">Telemóvel / Contacto *</label>
+                <input type="tel" id="cust-phone" required placeholder="Ex: 912 345 678" class="form-input-field" />
+              </div>
+              <div class="form-group" style="margin-top: 16px;">
+                <label for="cust-street">Rua e Número da Porta *</label>
+                <input type="text" id="cust-street" required placeholder="Ex: Rua das Flores, nº 15" class="form-input-field" />
+              </div>
+              <div class="form-row" style="margin-top: 16px;">
+                <div class="form-group">
+                  <label for="cust-postal">Código Postal *</label>
+                  <input type="text" id="cust-postal" required placeholder="Ex: 4000-000" class="form-input-field" />
+                </div>
+                <div class="form-group">
+                  <label for="cust-suite">Andar / Apartamento (opcional)</label>
+                  <input type="text" id="cust-suite" placeholder="Ex: 3º Esquerdo" class="form-input-field" />
+                </div>
+              </div>
+              <p class="form-warning-note" style="margin-top: 24px; color: var(--primary); font-weight: 600;">⚠️ Importante: Certifique-se de que estará em casa no dia e horário agendados para receber o nosso profissional.</p>
+            </form>
+            <div class="step-actions" style="margin-top: 32px; display: flex; justify-content: space-between;">
+              <button type="button" id="back-to-step-1" class="btn btn-outline">Voltar</button>
+              <button type="button" id="next-to-step-3" class="btn btn-primary">Prosseguir para Pagamento</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Payment details -->
+          <div class="booking-step-content" id="booking-step-3-el" style="display: none;">
+            <div class="payment-widget" style="margin-top: 24px;">
+              <div class="booking-summary-preview">
+                <h3>Resumo do Serviço</h3>
+                <p>Serviço: <strong>Limpeza de Vidros Impporta</strong></p>
+                <p>Janelas: <strong id="preview-windows">4 janelas</strong></p>
+                <p>Data/Hora: <strong id="preview-datetime">A carregar...</strong></p>
+                <p>Duração: <strong id="preview-duration">8 min</strong></p>
+                <p class="total-preview-cost">Total: <strong id="preview-cost">€16</strong></p>
+              </div>
+
+              <div class="payment-methods" style="margin-top: 24px;">
+                <h3>Método de Pagamento</h3>
+                <div class="payment-method-options" style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px;">
+                  <label class="pm-option active">
+                    <input type="radio" name="payment-method" value="online" checked />
+                    <div class="pm-info">
+                      <span class="pm-title">💳 Cartão de Crédito / Débito (Online)</span>
+                      <p>Pague online de forma 100% segura.</p>
+                    </div>
+                  </label>
+                  <label class="pm-option">
+                    <input type="radio" name="payment-method" value="mbway" />
+                    <div class="pm-info">
+                      <span class="pm-title">📱 MB Way</span>
+                      <p>Receba a notificação de pagamento diretamente no telemóvel.</p>
+                    </div>
+                  </label>
+                  <label class="pm-option">
+                    <input type="radio" name="payment-method" value="cash" />
+                    <div class="pm-info">
+                      <span class="pm-title">💵 Pagamento em mãos (Dinheiro / Cartão)</span>
+                      <p>Efetue o pagamento diretamente ao profissional no dia da limpeza.</p>
+                    </div>
+                  </label>
+                </div>
+
+                <!-- Card Details Form -->
+                <div id="card-details-fields" class="card-details-fields" style="margin-top: 20px;">
+                  <div class="form-group">
+                    <label for="card-num">Número do Cartão</label>
+                    <input type="text" id="card-num" placeholder="0000 0000 0000 0000" class="form-input-field" />
+                  </div>
+                  <div class="form-row" style="margin-top: 12px;">
+                    <div class="form-group">
+                      <label for="card-expiry">Validade</label>
+                      <input type="text" id="card-expiry" placeholder="MM/AA" class="form-input-field" />
+                    </div>
+                    <div class="form-group">
+                      <label for="card-cvc">CVC</label>
+                      <input type="text" id="card-cvc" placeholder="000" class="form-input-field" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- MBWay Details Form -->
+                <div id="mbway-details-fields" class="mbway-details-fields" style="display: none; margin-top: 20px;">
+                  <div class="form-group">
+                    <label for="mbway-phone">Telemóvel associado ao MB Way</label>
+                    <input type="tel" id="mbway-phone" placeholder="9xxxxxxxx" class="form-input-field" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-actions" style="margin-top: 32px; display: flex; justify-content: space-between;">
+              <button type="button" id="back-to-step-2" class="btn btn-outline">Voltar</button>
+              <button type="button" id="confirm-booking-btn" class="btn btn-primary">Confirmar e Finalizar</button>
+            </div>
+          </div>
+
+          <!-- Step 4: Success confirmation screen -->
+          <div class="booking-step-content" id="booking-step-4-el" style="display: none;">
+            <div class="success-widget" style="text-align: center; padding: 40px 20px;">
+              <div class="success-icon" style="width: 80px; height: 80px; background-color: rgba(16, 185, 129, 0.1); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--secondary);"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+              <h2 style="font-size: 2.25rem; font-weight: 700; margin-bottom: 8px;">Agendamento Confirmado!</h2>
+              <p style="color: var(--text-muted); margin-bottom: 32px;">O seu pedido foi registado com sucesso. Guarde o resumo do seu agendamento:</p>
+              
+              <div class="receipt-box">
+                <div class="receipt-row"><span>Nº do Serviço:</span><strong id="receipt-id">#IMP-94827</strong></div>
+                <div class="receipt-row"><span>Cliente:</span><strong id="receipt-name">João Silva</strong></div>
+                <div class="receipt-row"><span>Contacto:</span><strong id="receipt-phone">912 345 678</strong></div>
+                <div class="receipt-row"><span>Morada:</span><strong id="receipt-address">Rua das Flores, nº 15, Porto</strong></div>
+                <div class="receipt-row"><span>Quantidade de Vidros:</span><strong id="receipt-windows">4 janelas</strong></div>
+                <div class="receipt-row"><span>Duração Estimada:</span><strong id="receipt-duration">8 minutos (14:00 às 14:08)</strong></div>
+                <div class="receipt-row"><span>Método Escolhido:</span><strong id="receipt-payment">Pagamento em Mãos</strong></div>
+                <div class="receipt-row total"><span>Total Pago / A Pagar:</span><strong id="receipt-total">€16</strong></div>
+              </div>
+
+              <div class="success-actions" style="margin-top: 32px;">
+                <button type="button" id="restart-booking-btn" class="btn btn-primary">Fazer Novo Agendamento</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <a href="#"><img src="./logo.svg" alt="Impporta Logo" style="height: 32px;" /></a>
+        </div>
+        <div class="footer-links">
+          <a href="#services">O Que Fazemos</a>
+          <a href="#process">Como Funciona</a>
+          <a href="#calculator">Simulador</a>
+          <a href="#calendar">Agendamento</a>
+          <a href="./about.html">Quem Somos</a>
+        </div>
+      </div>
+        <div class="footer-legal-links">
+          <a href="./termos.html">Termos e Condições</a>
+          <a href="./privacidade.html">Política de Privacidade</a>
+          <a href="https://www.livroreclamacoes.pt/" target="_blank" rel="noopener noreferrer">Livro de Reclamações</a>
+          <a href="./resolucao-litigios.html">Resolução de Litígios</a>
+        </div>
+      <div class="footer-bottom">
+        &copy; 2026 Impporta. Todos os direitos reservados.
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./main.js"></script>
+</body>
+</html>
