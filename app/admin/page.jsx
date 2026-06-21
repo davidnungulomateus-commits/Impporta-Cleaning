@@ -391,7 +391,11 @@ export default function AdminCalendarPage() {
                 <div className="detail-group">
                   <label>Preço Total</label>
                   <div className="detail-val" style={{ color: 'var(--primary)', fontWeight: '700' }}>€{selectedBooking.total_price}</div>
-                  <div className="detail-subval">{selectedBooking.payment_method}</div>
+                </div>
+                <div className="detail-group">
+                  <label>Método de Pagamento</label>
+                  <div className="detail-val" style={{ textTransform: 'capitalize' }}>{selectedBooking.payment_method || 'A Confirmar'}</div>
+                  <div className="detail-subval">Status: {selectedBooking.status}</div>
                 </div>
               </div>
 
