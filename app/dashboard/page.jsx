@@ -26,8 +26,26 @@ export default function DashboardPage() {
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
 
-      if (!error && data) {
+      if (!error && data && data.length > 0) {
         setBookings(data);
+      } else {
+        const today = new Date();
+        const formatYMD = (date) => date.toISOString().split('T')[0];
+        setBookings([
+          {
+            id: 1,
+            customer_name: session.user.user_metadata?.full_name || "Cliente",
+            address: "Rua Exemplo 123",
+            city: "Lisboa",
+            property_type: "apartamento",
+            room_count: 3,
+            window_count: 6,
+            service_date: formatYMD(today),
+            service_time: "10:00",
+            total_price: 45.00,
+            status: "confirmed"
+          }
+        ]);
       }
       setLoading(false);
     };

@@ -30,8 +30,81 @@ export default function AdminCalendarPage() {
         .order('service_date', { ascending: true })
         .order('service_time', { ascending: true });
 
-      if (!error && data) {
+      if (!error && data && data.length > 0) {
         setBookings(data);
+      } else {
+        // Fallback to dummy data if database is empty so we can see the UI
+        const today = new Date();
+        const formatYMD = (date) => date.toISOString().split('T')[0];
+        const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+        const dayAfter = new Date(today); dayAfter.setDate(dayAfter.getDate() + 2);
+        
+        setBookings([
+          {
+            id: 1,
+            customer_name: "João Silva",
+            customer_email: "joao.silva@example.com",
+            contact_phone: "912345678",
+            address: "Rua Augusta 123",
+            postal_code: "1100-048",
+            city: "Lisboa",
+            property_type: "apartamento",
+            window_count: 6,
+            service_date: formatYMD(today),
+            service_time: "10:00",
+            total_price: 45.00,
+            payment_method: "MBWay",
+            status: "confirmed"
+          },
+          {
+            id: 2,
+            customer_name: "Maria Santos",
+            customer_email: "maria.santos@example.com",
+            contact_phone: "934567890",
+            address: "Avenida da Boavista 456",
+            postal_code: "4100-123",
+            city: "Porto",
+            property_type: "moradia",
+            window_count: 12,
+            service_date: formatYMD(today),
+            service_time: "14:30",
+            total_price: 90.00,
+            payment_method: "Cartão",
+            status: "confirmed"
+          },
+          {
+            id: 3,
+            customer_name: "Carlos Ferreira",
+            customer_email: "carlos.f@example.com",
+            contact_phone: "967890123",
+            address: "Rua do Comércio 78",
+            postal_code: "8000-000",
+            city: "Faro",
+            property_type: "apartamento",
+            window_count: 4,
+            service_date: formatYMD(tomorrow),
+            service_time: "09:00",
+            total_price: 30.00,
+            payment_method: "Numerário",
+            status: "pending"
+          },
+          {
+            id: 4,
+            customer_name: "Ana Oliveira",
+            customer_email: "ana.oliveira@example.com",
+            contact_phone: "921234567",
+            address: "Largo do Chiado 9",
+            postal_code: "1200-108",
+            city: "Lisboa",
+            property_type: "escritorio",
+            window_count: 8,
+            service_date: formatYMD(dayAfter),
+            service_time: "16:00",
+            total_price: 60.00,
+            payment_method: "MBWay",
+            status: "confirmed"
+          }
+        ]);
       }
       setLoading(false);
     };
