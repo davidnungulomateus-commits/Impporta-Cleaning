@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Impporta - Meu Painel</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="./index.html" class="nav-brand">
+        <img src="./logo.svg" alt="Impporta Logo" />
+      </a>
+      <ul class="nav-menu">
+        <li><a href="./index.html" class="nav-link">Página Inicial</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button id="logout-btn" class="btn btn-outline" style="border: none; color: var(--text-muted);">Sair</button>
+        <a href="./index.html#calculator" class="btn btn-primary">Novo Agendamento</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Dashboard Content -->
+  <section class="dashboard-wrapper">
+    <div class="container">
+      <div class="dashboard-header fade-up visible">
+        <h1>Olá, <span id="user-name" class="text-primary">Utilizador</span>!</h1>
+      </div>
+
+      <div class="dashboard-section fade-up visible" style="transition-delay: 0.1s;">
+        <h2>Agendamentos Futuros</h2>
+        <div id="upcoming-bookings" class="bookings-grid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="dashboard-section fade-up visible" style="transition-delay: 0.2s;">
+        <h2>Histórico de Limpezas</h2>
+        <div id="past-bookings" class="bookings-grid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="./dashboard.js"></script>
+</body>
+</html>
