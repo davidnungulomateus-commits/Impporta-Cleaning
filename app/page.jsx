@@ -340,7 +340,7 @@ export default function Home() {
                       </div>
                       <div className="calendar-days-grid">
                         {Array.from({ length: new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), 1).getDay() }).map((_, i) => (
-                          <div key={`pad-${i}`} className="calendar-day empty"></div>
+                          <div key={`pad-${i}`} className="calendar-day-cell" style={{ visibility: 'hidden' }}></div>
                         ))}
                         {Array.from({ length: new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 0).getDate() }).map((_, i) => {
                           const date = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), i + 1);
@@ -349,13 +349,8 @@ export default function Home() {
                           return (
                             <div 
                               key={`day-${i}`} 
-                              className={`calendar-day ${isPast ? 'past' : 'available'} ${isSelected ? 'today selected' : ''}`}
+                              className={`calendar-day-cell ${isPast ? 'disabled' : ''} ${isSelected ? 'selected' : ''}`}
                               onClick={() => { if (!isPast) setSelectedDate(date); }}
-                              style={{ 
-                                cursor: isPast ? 'not-allowed' : 'pointer',
-                                backgroundColor: isSelected ? 'var(--primary)' : '',
-                                color: isSelected ? '#fff' : ''
-                              }}
                             >
                               {i + 1}
                             </div>
