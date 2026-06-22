@@ -23,6 +23,7 @@ export default function Home() {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
   const [currentMonthDate, setCurrentMonthDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [paymentMethod, setPaymentMethod] = useState('online');
+  const [existingBookings, setExistingBookings] = useState([]);
 
   // Customer Form Data
   const [formData, setFormData] = useState({
@@ -105,6 +106,34 @@ export default function Home() {
     };
     fetchSessionAndSupport();
   }, []);
+
+  useEffect(() => {
+    if (!selectedDate) return;
+    
+    // Convert to local YYYY-MM-DD
+    const localDateStr = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+    
+    const fetchBookings = async () => {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('service_time, window_count')
+        .eq('service_date', localDateStr)
+        .neq('status', 'cancelled');
+        
+      if (!error && data) {
+        setExistingBookings(data);
+      } else {
+        setExistingBookings([]);
+      }
+    };
+    fetchBookings();
+  }, [selectedDate]);
+
+  const timeToMinutes = (timeStr) => {
+    if (!timeStr) return 0;
+    const [h, m] = timeStr.split(':').map(Number);
+    return h * 60 + m;
+  };
 
   const handleGoogleFill = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -461,21 +490,40 @@ export default function Home() {
                           const hour = Math.floor(i / 2) + 5;
                           const min = i % 2 === 0 ? '00' : '30';
                           return `${hour.toString().padStart(2, '0')}:${min}`;
-                        }).map(time => (
-                          <button 
-                            key={time} 
-                            type="button" 
-                            className={`time-slot-btn ${selectedTimeSlot === time ? 'selected' : ''}`}
-                            onClick={() => setSelectedTimeSlot(time)}
-                            style={{
-                              backgroundColor: selectedTimeSlot === time ? 'var(--primary)' : '',
-                              color: selectedTimeSlot === time ? '#fff' : '',
-                              borderColor: selectedTimeSlot === time ? 'var(--primary)' : ''
-                            }}
-                          >
-                            {time}
-                          </button>
-                        ))}
+                        }).map(time => {
+                          const newDuration = 30 + windowCount * 2;
+                          const newStart = timeToMinutes(time);
+                          const newEnd = newStart + newDuration;
+                          
+                          const isConflict = existingBookings.some(b => {
+                            const bStart = timeToMinutes(b.service_time);
+                            const bDuration = 30 + (b.window_count || 4) * 2;
+                            const bEnd = bStart + bDuration;
+                            
+                            // Check overlap condition
+                            return (newStart < bEnd) && (newEnd > bStart);
+                          });
+
+                          return (
+                            <button 
+                              key={time} 
+                              type="button" 
+                              disabled={isConflict}
+                              className={`time-slot-btn ${selectedTimeSlot === time ? 'selected' : ''}`}
+                              onClick={() => setSelectedTimeSlot(time)}
+                              style={{
+                                backgroundColor: selectedTimeSlot === time ? 'var(--primary)' : (isConflict ? '#f1f5f9' : ''),
+                                color: selectedTimeSlot === time ? '#fff' : (isConflict ? '#94a3b8' : ''),
+                                borderColor: selectedTimeSlot === time ? 'var(--primary)' : (isConflict ? '#e2e8f0' : ''),
+                                cursor: isConflict ? 'not-allowed' : 'pointer',
+                                opacity: isConflict ? 0.6 : 1,
+                                textDecoration: isConflict ? 'line-through' : 'none'
+                              }}
+                            >
+                              {time}
+                            </button>
+                          );
+                        })}
                       </div>
                       <div className="slot-summary-box" style={{ display: 'none' }}>
                         <p>Duração estimada: <strong>8 minutos</strong></p>
