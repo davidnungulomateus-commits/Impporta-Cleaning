@@ -286,15 +286,28 @@ export default function AdminCalendarPage() {
               {/* Days */}
               {daysInMonth.map(date => {
                 const isSelected = isSameDay(date, currentDate);
-                const hasBooking = bookings.some(b => b.service_date && isSameDay(new Date(b.service_date), date));
+                const dayBookings = bookings.filter(b => b.service_date && isSameDay(new Date(b.service_date), date));
+                const hasActiveBooking = dayBookings.some(b => b.status !== 'cancelled');
+                const hasCancelledBooking = dayBookings.length > 0 && dayBookings.every(b => b.status === 'cancelled');
                 
                 return (
                   <button 
                     key={date.toISOString()} 
-                    className={`mc-day ${isSelected ? 'selected' : ''} ${hasBooking ? 'has-event' : ''}`}
+                    className={`mc-day ${isSelected ? 'selected' : ''}`}
                     onClick={() => handleDayClick(date)}
+                    style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
                   >
-                    {date.getDate()}
+                    <span>{date.getDate()}</span>
+                    {(hasActiveBooking || hasCancelledBooking) && (
+                      <span style={{ 
+                        width: '4px', 
+                        height: '4px', 
+                        borderRadius: '50%', 
+                        backgroundColor: hasActiveBooking ? '#10b981' : '#ef4444',
+                        position: 'absolute',
+                        bottom: '4px'
+                      }}></span>
+                    )}
                   </button>
                 );
               })}
