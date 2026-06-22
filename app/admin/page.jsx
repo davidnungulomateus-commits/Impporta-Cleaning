@@ -278,8 +278,14 @@ export default function AdminCalendarPage() {
                   
                   const rect = e.currentTarget.getBoundingClientRect();
                   const y = e.clientY - rect.top;
-                  const droppedHour = Math.floor(y / 80) + 8; // 80px per hour
-                  const newTime = `${Math.max(8, Math.min(20, droppedHour)).toString().padStart(2, '0')}:00`;
+                  
+                  // 80px per hour, 40px per 30 mins
+                  const slots = Math.floor(y / 40);
+                  const hoursToAdd = Math.floor(slots / 2);
+                  const minutesToAdd = (slots % 2) * 30;
+                  
+                  const droppedHour = Math.max(8, Math.min(20, 8 + hoursToAdd));
+                  const newTime = `${droppedHour.toString().padStart(2, '0')}:${minutesToAdd === 0 ? '00' : '30'}`;
                   
                   if (draggedBooking.service_time !== newTime) {
                     setBookings(prev => prev.map(b => b.id === draggedBooking.id ? { ...b, service_time: newTime } : b));
@@ -330,31 +336,34 @@ export default function AdminCalendarPage() {
                       onDragEnd={() => setDraggedBooking(null)}
                       style={{ 
                         top: `${topPercentage}px`, 
-                        height: `${Math.max(70, heightPx)}px`, // Increased minimum height slightly to fit the badge
+                        height: `${heightPx}px`, 
+                        minHeight: '45px',
                         backgroundColor: colors[colorIdx],
                         borderLeft: `4px solid ${borderColors[colorIdx]}`,
                         display: 'flex',
                         flexDirection: 'column',
-                        justifyContent: 'space-between'
+                        justifyContent: 'space-between',
+                        overflow: 'hidden'
                       }}
                       onClick={() => setSelectedBooking(booking)}
                     >
-                      <div>
+                      <div style={{ flexShrink: 0 }}>
                         <div className="event-title">{booking.customer_name}</div>
-                        <div className="event-time">{booking.time_slot || booking.service_time} ({durationMins} min)</div>
+                        <div className="event-time" style={{ fontSize: '0.75rem', opacity: 0.8 }}>{booking.time_slot || booking.service_time} ({durationMins} min)</div>
                       </div>
                       
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '4px' }}>
-                        <div className="event-meta">📍 {booking.postal_code || booking.city}</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto', flexShrink: 0 }}>
+                        <div className="event-meta" style={{ fontSize: '0.7rem' }}>📍 {booking.postal_code || booking.city}</div>
                         
                         {/* Payment Method Badge */}
                         <div style={{ 
-                          fontSize: '0.7rem', 
+                          fontSize: '0.65rem', 
                           fontWeight: '700', 
-                          padding: '2px 6px', 
+                          padding: '2px 4px', 
                           borderRadius: '4px',
                           backgroundColor: 'rgba(0,0,0,0.05)',
-                          color: borderColors[colorIdx]
+                          color: borderColors[colorIdx],
+                          whiteSpace: 'nowrap'
                         }}>
                           {booking.payment_method || 'A Confirmar'}
                         </div>
