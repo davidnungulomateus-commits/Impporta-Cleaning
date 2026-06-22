@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import confetti from 'canvas-confetti';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -26,10 +27,37 @@ export default function Home() {
     suite: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [supportCount, setSupportCount] = useState(0);
+  const [hasSupported, setHasSupported] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    // Fetch initial support count
+    const fetchSupportCount = async () => {
+      const { data, error } = await supabase.from('support_stats').select('count').eq('id', 1).single();
+      if (data && !error) {
+        setSupportCount(data.count);
+      }
+    };
+    fetchSupportCount();
   }, []);
+
+  const handleSupportClick = async () => {
+    if (hasSupported) return;
+    setHasSupported(true);
+    setSupportCount(prev => prev + 1);
+
+    // Glitter effect matching the brand colors
+    confetti({
+      particleCount: 150,
+      spread: 80,
+      origin: { y: 0.6 },
+      colors: ['#2e5cff', '#00e5ff', '#ffffff'] 
+    });
+
+    // Update database
+    await supabase.rpc('increment_support_count');
+  };
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -59,6 +87,7 @@ export default function Home() {
       window_count: windowCount,
       address: `${formData.street}${formData.suite ? ', ' + formData.suite : ''}`,
       city: formData.postal,
+      postal_code: formData.postal,
       payment_method: paymentMethod,
       status: 'pending'
     }]);
@@ -91,18 +120,22 @@ export default function Home() {
           <p>Sinta a diferença com a Impporta — onde a transparência, o brilho e a sua tranquilidade vêm em primeiro lugar. Garantimos vidros impecáveis e seguros para o seu ambiente.</p>
           <div className="hero-buttons">
             <a href="#calculator" className="btn btn-primary">Agendar Já</a>
-            <button className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <button 
+              className={`btn btn-outline ${hasSupported ? 'supported' : ''}`} 
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: hasSupported ? 'default' : 'pointer', opacity: hasSupported ? 0.8 : 1 }}
+              onClick={handleSupportClick}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill={hasSupported ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
               </svg>
-              Apoiar a Impporta
+              {hasSupported ? 'Obrigado pelo apoio!' : 'Apoiar a Impporta'}
             </button>
           </div>
           
           <div className="stats">
             <div className="stat-item fade-up visible" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '650px', margin: '0 auto' }}>
               <div className="counter-container" style={{ position: 'relative', display: 'inline-block' }}>
-                <h3><span>0</span><span className="text-secondary">+</span></h3>
+                <h3><span>{supportCount}</span><span className="text-secondary">+</span></h3>
               </div>
               <p className="stat-label">Clientes que nos apoiam</p>
               <p className="stat-dream-quote">"Somos uma equipa nova e jovem, mas carregamos o grande sonho de nos tornarmos a empresa número um em limpeza de vidros e janelas. A nossa dedicação e vontade de trabalhar são honestas e infinitas!"</p>
