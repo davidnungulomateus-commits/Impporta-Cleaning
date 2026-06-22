@@ -162,8 +162,8 @@ export default function AdminCalendarPage() {
   const daysInMonth = getDaysInMonth(currentDate);
   const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
-  // Define hours for the timeline (e.g. 8h to 20h)
-  const hours = Array.from({ length: 13 }, (_, i) => i + 8);
+  // Define hours for the timeline (e.g. 5h to 22h)
+  const hours = Array.from({ length: 18 }, (_, i) => i + 5);
 
   return (
     <main className="admin-wrapper bg-alt">
@@ -284,7 +284,7 @@ export default function AdminCalendarPage() {
                   const hoursToAdd = Math.floor(slots / 4);
                   const minutesToAdd = (slots % 4) * 15;
                   
-                  const droppedHour = Math.max(8, Math.min(20, 8 + hoursToAdd));
+                  const droppedHour = Math.max(5, Math.min(22, 5 + hoursToAdd));
                   const newTime = `${droppedHour.toString().padStart(2, '0')}:${minutesToAdd.toString().padStart(2, '0')}`;
                   
                   if (draggedBooking.service_time !== newTime) {
@@ -312,8 +312,8 @@ export default function AdminCalendarPage() {
                 {dailyBookings.map((booking, idx) => {
                   // Calculate position based on service_time (e.g. "14:00")
                   const [bHour, bMin] = (booking.service_time || "09:00").split(':').map(Number);
-                  const startHour = Math.max(8, bHour); // Clamp to 8am
-                  const topPercentage = ((startHour - 8) + (bMin / 60)) * 80; // 80px per hour
+                  const startHour = Math.max(5, bHour); // Clamp to 5am
+                  const topPercentage = ((startHour - 5) + (bMin / 60)) * 80; // 80px per hour
                   
                   // Duration logic: assume 30 mins base + window_count * 2 mins
                   const durationMins = 30 + (booking.window_count || 4) * 2; 
