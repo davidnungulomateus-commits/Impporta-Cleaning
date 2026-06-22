@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -15,9 +16,63 @@ export default function Home() {
   const [currentMonthDate, setCurrentMonthDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [paymentMethod, setPaymentMethod] = useState('online');
 
+  // Customer Form Data
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    street: '',
+    postal: '',
+    suite: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id.replace('cust-', '')]: value }));
+  };
+
+  const handleFinalizeBooking = async () => {
+    if (!selectedDate || !selectedTimeSlot) {
+      alert("Por favor, selecione uma data e horário no Passo 1.");
+      setStep(1);
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    // Convert selectedDate to local YYYY-MM-DD to avoid timezone shift issues
+    const localDateStr = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+
+    // Create booking in Supabase
+    const { error } = await supabase.from('bookings').insert([{
+      customer_name: formData.name,
+      contact_email: formData.email,
+      contact_phone: formData.phone,
+      service_date: localDateStr,
+      service_time: selectedTimeSlot,
+      total_price: totalPrice,
+      window_count: windowCount,
+      address: `${formData.street}${formData.suite ? ', ' + formData.suite : ''}`,
+      city: formData.postal,
+      payment_method: paymentMethod,
+      status: 'pending'
+    }]);
+
+    setIsSubmitting(false);
+
+    if (error) {
+      console.error('Error creating booking:', error);
+      alert('Houve um erro ao agendar. Por favor, tente novamente.');
+      return;
+    }
+
+    setStep(4);
+  };
 
   const handleWindowChange = (e) => {
     const val = parseInt(e.target.value) || 1;
@@ -313,29 +368,29 @@ export default function Home() {
                     <div className="form-row">
                       <div className="form-group">
                         <label htmlFor="cust-name">Nome Completo *</label>
-                        <input type="text" id="cust-name" required placeholder="Ex: João Silva" className="form-input-field" />
+                        <input type="text" id="cust-name" required placeholder="Ex: João Silva" className="form-input-field" value={formData.name} onChange={handleInputChange} />
                       </div>
                       <div className="form-group">
                         <label htmlFor="cust-email">Email</label>
-                        <input type="email" id="cust-email" placeholder="Ex: joao@email.com" className="form-input-field" />
+                        <input type="email" id="cust-email" placeholder="Ex: joao@email.com" className="form-input-field" value={formData.email} onChange={handleInputChange} />
                       </div>
                     </div>
                     <div className="form-group" style={{ marginTop: '16px' }}>
                       <label htmlFor="cust-phone">Telemóvel / Contacto *</label>
-                      <input type="tel" id="cust-phone" required placeholder="Ex: 912 345 678" className="form-input-field" />
+                      <input type="tel" id="cust-phone" required placeholder="Ex: 912 345 678" className="form-input-field" value={formData.phone} onChange={handleInputChange} />
                     </div>
                     <div className="form-group" style={{ marginTop: '16px' }}>
                       <label htmlFor="cust-street">Rua e Número da Porta *</label>
-                      <input type="text" id="cust-street" required placeholder="Ex: Rua das Flores, nº 15" className="form-input-field" />
+                      <input type="text" id="cust-street" required placeholder="Ex: Rua das Flores, nº 15" className="form-input-field" value={formData.street} onChange={handleInputChange} />
                     </div>
                     <div className="form-row" style={{ marginTop: '16px' }}>
                       <div className="form-group">
                         <label htmlFor="cust-postal">Código Postal *</label>
-                        <input type="text" id="cust-postal" required placeholder="Ex: 4000-000" className="form-input-field" />
+                        <input type="text" id="cust-postal" required placeholder="Ex: 4000-000" className="form-input-field" value={formData.postal} onChange={handleInputChange} />
                       </div>
                       <div className="form-group">
                         <label htmlFor="cust-suite">Andar / Apartamento (opcional)</label>
-                        <input type="text" id="cust-suite" placeholder="Ex: 3º Esquerdo" className="form-input-field" />
+                        <input type="text" id="cust-suite" placeholder="Ex: 3º Esquerdo" className="form-input-field" value={formData.suite} onChange={handleInputChange} />
                       </div>
                     </div>
                     <p className="form-warning-note" style={{ marginTop: '24px', color: 'var(--primary)', fontWeight: '600' }}>⚠️ Importante: Certifique-se de que estará em casa no dia e horário agendados para receber o nosso profissional.</p>
@@ -354,8 +409,8 @@ export default function Home() {
                       <h3>Resumo do Serviço</h3>
                       <p>Serviço: <strong>Limpeza de Vidros Impporta</strong></p>
                       <p>Janelas: <strong>{windowCount} janelas</strong></p>
-                      <p>Data/Hora: <strong>A carregar...</strong></p>
-                      <p>Duração: <strong>{windowCount * 2} min</strong></p>
+                      <p>Data/Hora: <strong>{selectedDate ? selectedDate.toLocaleDateString('pt-PT') : ''} às {selectedTimeSlot || '?'}</strong></p>
+                      <p>Duração estimada: <strong>{30 + windowCount * 2} min</strong></p>
                       <p className="total-preview-cost">Total: <strong>€{totalPrice}</strong></p>
                     </div>
 
@@ -417,7 +472,9 @@ export default function Home() {
 
                   <div className="step-actions" style={{ marginTop: '32px', display: 'flex', justifyContent: 'space-between' }}>
                     <button type="button" className="btn btn-outline" onClick={() => setStep(2)}>Voltar</button>
-                    <button type="button" className="btn btn-primary" onClick={() => setStep(4)}>Confirmar e Finalizar</button>
+                    <button type="button" className="btn btn-primary" onClick={handleFinalizeBooking} disabled={isSubmitting}>
+                      {isSubmitting ? 'A processar...' : 'Confirmar e Finalizar'}
+                    </button>
                   </div>
                 </div>
               )}
