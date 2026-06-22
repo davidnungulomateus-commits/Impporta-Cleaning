@@ -564,7 +564,7 @@ export default function AdminCalendarPage() {
               </div>
               
               {/* Status Banner */}
-              <div style={{ padding: '12px 16px', backgroundColor: selectedBooking.status === 'paid' ? '#f0fdf4' : '#fffbeb', borderRadius: '8px', border: `1px solid ${selectedBooking.status === 'paid' ? '#bbf7d0' : '#fde68a'}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ padding: '12px 16px', backgroundColor: selectedBooking.status === 'paid' ? '#f0fdf4' : '#fffbeb', borderRadius: '8px', border: selectedBooking.status === 'paid' ? '1px solid #bbf7d0' : '1px solid #fde68a', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <span style={{ fontSize: '0.85rem', color: '#64748b', marginRight: '6px' }}>Método:</span>
                   <strong style={{ textTransform: 'capitalize', color: '#1e293b', fontSize: '0.9rem' }}>{selectedBooking.payment_method || 'A Confirmar'}</strong>
@@ -574,8 +574,9 @@ export default function AdminCalendarPage() {
                   {selectedBooking.status === 'paid' ? 'Pago' : 'Pendente'}
                 </div>
               </div>
+            </div>
 
-              <div className="modal-actions" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="modal-actions" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               
               {selectedBooking.status !== 'paid' && !paymentAction && selectedBooking.status !== 'cancelled' && (
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -615,13 +616,13 @@ export default function AdminCalendarPage() {
                 </div>
               )}
 
-              {paymentAction === 'link' && paymentLinkUrl && (
+              {paymentAction === 'link' && adminPaymentLink && (
                 <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <h4 style={{ margin: '0', fontSize: '1rem' }}>Link de Pagamento Gerado</h4>
                   <p style={{ margin: '0', fontSize: '0.85rem', color: '#64748b' }}>Copie o link abaixo e envie ao cliente:</p>
                   <input 
                     type="text" 
-                    value={paymentLinkUrl} 
+                    value={adminPaymentLink} 
                     readOnly 
                     style={{ width: '100%', padding: '8px', fontSize: '0.85rem', border: '1px solid #cbd5e1', borderRadius: '4px', backgroundColor: '#fff' }} 
                     onClick={(e) => { e.target.select(); navigator.clipboard.writeText(e.target.value); alert('Link copiado!'); }}
@@ -631,7 +632,7 @@ export default function AdminCalendarPage() {
                       className="btn" 
                       style={{ flex: 1, backgroundColor: '#25D366', color: '#fff', fontSize: '0.85rem', padding: '8px' }}
                       onClick={() => {
-                        const message = encodeURIComponent(`Olá ${selectedBooking.customer_name}, o link para o pagamento do seu agendamento (Valor: €${selectedBooking.total_price}) é: ${paymentLinkUrl}`);
+                        const message = encodeURIComponent(`Olá ${selectedBooking.customer_name}, o link para o pagamento do seu agendamento (Valor: €${selectedBooking.total_price}) é: ${adminPaymentLink}`);
                         window.open(`https://wa.me/351${selectedBooking.contact_phone.replace(/\D/g, '')}?text=${message}`, '_blank');
                       }}
                     >
@@ -642,7 +643,7 @@ export default function AdminCalendarPage() {
                       style={{ flex: 1, fontSize: '0.85rem', padding: '8px' }}
                       onClick={() => {
                         const subject = encodeURIComponent('Link de Pagamento - Impporta Limpezas');
-                        const body = encodeURIComponent(`Olá ${selectedBooking.customer_name},\n\nO link para o pagamento do seu agendamento (Valor: €${selectedBooking.total_price}) é:\n${paymentLinkUrl}\n\nObrigado,\nImpporta Limpezas`);
+                        const body = encodeURIComponent(`Olá ${selectedBooking.customer_name},\n\nO link para o pagamento do seu agendamento (Valor: €${selectedBooking.total_price}) é:\n${adminPaymentLink}\n\nObrigado,\nImpporta Limpezas`);
                         window.open(`mailto:${selectedBooking.customer_email}?subject=${subject}&body=${body}`, '_blank');
                       }}
                     >
@@ -659,28 +660,27 @@ export default function AdminCalendarPage() {
                 <button 
                   className="btn btn-primary" 
                   style={{ backgroundColor: '#25D366', borderColor: '#25D366', width: '100%', fontSize: '0.9rem', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', borderRadius: '8px', fontWeight: '600', color: 'white', boxShadow: '0 4px 14px 0 rgba(37,211,102,0.39)' }}
-                  onClick={() => handleWhatsApp(selectedBooking)}
+                  onClick={() => {
+                    const message = encodeURIComponent(`Olá ${selectedBooking.customer_name},\n\nEntramos em contacto da Impporta Limpezas referente ao seu agendamento.`);
+                    window.open(`https://wa.me/351${selectedBooking.contact_phone?.replace(/\D/g,'')}?text=${message}`, '_blank');
+                  }}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                   Conversar no WhatsApp
                 </button>
               )}
-
-              {!paymentAction && selectedBooking.status !== 'cancelled' ? (
+              
+              {!paymentAction && selectedBooking.status !== 'cancelled' && (
                 <button 
-                  className="btn btn-outline" 
-                  style={{ width: '100%', borderColor: '#ef4444', color: '#ef4444' }}
-                  onClick={() => handleCancelBooking(selectedBooking.id)}
+                  className="btn" 
+                  style={{ backgroundColor: 'transparent', border: '1px solid #fecaca', color: '#ef4444', width: '100%', fontSize: '0.9rem', padding: '12px', borderRadius: '8px', fontWeight: '600', transition: 'all 0.2s' }}
+                  onClick={() => {
+                    if(confirm('Tem a certeza que deseja cancelar este agendamento?')) {
+                      handleUpdateBooking(selectedBooking.id, 'status', 'cancelled');
+                    }
+                  }}
                 >
                   Cancelar Agendamento
-                </button>
-              ) : !paymentAction && selectedBooking.status === 'cancelled' && (
-                <button 
-                  className="btn btn-primary" 
-                  style={{ width: '100%' }}
-                  onClick={() => handleRestoreBooking(selectedBooking.id)}
-                >
-                  Restaurar Agendamento
                 </button>
               )}
             </div>
