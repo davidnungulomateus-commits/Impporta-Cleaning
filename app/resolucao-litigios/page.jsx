@@ -6,7 +6,7 @@ export const metadata = {
 export default function ResolucaoLitigios() {
   return (
     <main className="legal-page fade-up visible">
-      <div className="container" style={{ padding: '60px 20px', maxWidth: '800px', margin: '0 auto' }}>
+      <div className="container" style={{ padding: '140px 20px 80px', maxWidth: '800px', margin: '0 auto' }}>
         <h1 style={{ marginBottom: '32px', color: 'var(--primary)' }}>Resolução Alternativa de Litígios</h1>
         
         <div className="legal-content" style={{ lineHeight: '1.7', color: 'var(--text-main)' }}>

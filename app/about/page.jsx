@@ -48,11 +48,11 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="cta-section section-padding text-center">
+      <section className="cta-section section-padding text-center" style={{ paddingBottom: '100px' }}>
         <div className="container fade-up visible">
           <h2>Pronto para ver a diferença?</h2>
           <p style={{ marginBottom: '32px' }}>Agende a sua limpeza hoje mesmo e deixe o trabalho connosco.</p>
-          <Link href="/#calculator" className="btn btn-primary">Fazer Simulação Gratuita</Link>
+          <Link href="/#calculator" className="btn btn-primary">Simulador</Link>
         </div>
       </section>
     </main>

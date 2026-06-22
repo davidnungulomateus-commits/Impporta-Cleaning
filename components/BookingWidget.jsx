@@ -1,0 +1,481 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
+import { useRouter } from 'next/navigation';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import CheckoutForm from './CheckoutForm';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+
+export default function BookingWidget() {
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  const [step, setStep] = useState(1);
+  const [windowCount, setWindowCount] = useState(4);
+  const [totalPrice, setTotalPrice] = useState(16);
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
+  const [currentMonthDate, setCurrentMonthDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [paymentMethod, setPaymentMethod] = useState('online');
+  const [existingBookings, setExistingBookings] = useState([]);
+
+  // Customer Form Data
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    street: '',
+    postal: '',
+    suite: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [clientSecret, setClientSecret] = useState('');
+
+  useEffect(() => {
+    if (step === 3 && (paymentMethod === 'online' || paymentMethod === 'mbway') && totalPrice > 0) {
+      setClientSecret('');
+      fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          amount: totalPrice,
+          paymentMethodType: paymentMethod === 'online' ? 'card' : 'mb_way',
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => setClientSecret(data.clientSecret))
+        .catch((err) => console.error("Error fetching intent:", err));
+    }
+  }, [step, paymentMethod, totalPrice, formData.name, formData.email, formData.phone]);
+
+  useEffect(() => {
+    setMounted(true);
+    
+    // Restore state if coming back from Google Auth
+    const restoreState = () => {
+      const savedState = sessionStorage.getItem('impporta_booking_state');
+      if (savedState) {
+        try {
+          const parsed = JSON.parse(savedState);
+          if (parsed.windowCount) setWindowCount(parsed.windowCount);
+          if (parsed.totalPrice) setTotalPrice(parsed.totalPrice);
+          if (parsed.selectedTimeSlot) setSelectedTimeSlot(parsed.selectedTimeSlot);
+          if (parsed.selectedDate) setSelectedDate(new Date(parsed.selectedDate));
+          if (parsed.step) setStep(parsed.step);
+          
+          // Scroll to calendar section
+          setTimeout(() => {
+            document.getElementById('calendar')?.scrollIntoView({ behavior: 'smooth' });
+          }, 500);
+        } catch (e) {
+          console.error("Error restoring state", e);
+        }
+        sessionStorage.removeItem('impporta_booking_state');
+      }
+    };
+    restoreState();
+
+    const fetchSessionForAutofill = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && session.user) {
+        setFormData(prev => ({
+          ...prev,
+          name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || prev.name,
+          email: session.user.email || prev.email,
+          phone: session.user.user_metadata?.phone || session.user.phone || prev.phone
+        }));
+      }
+    };
+    fetchSessionForAutofill();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedDate) return;
+    
+    // Convert to local YYYY-MM-DD
+    const localDateStr = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+    
+    const fetchBookings = async () => {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('service_time, window_count')
+        .eq('service_date', localDateStr)
+        .neq('status', 'cancelled');
+        
+      if (!error && data) {
+        setExistingBookings(data);
+      } else {
+        setExistingBookings([]);
+      }
+    };
+    fetchBookings();
+  }, [selectedDate]);
+
+  const timeToMinutes = (timeStr) => {
+    if (!timeStr) return 0;
+    const [h, m] = timeStr.split(':').map(Number);
+    return h * 60 + m;
+  };
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id.replace('cust-', '')]: value }));
+  };
+
+  const handleFinalizeBooking = async (e, overrideStatus = null) => {
+    if (!selectedDate || !selectedTimeSlot) {
+      alert("Por favor, selecione uma data e horário no Passo 1.");
+      setStep(1);
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    // Convert selectedDate to local YYYY-MM-DD to avoid timezone shift issues
+    const localDateStr = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+
+    // Create booking in Supabase
+    const { error } = await supabase.from('bookings').insert([{
+      customer_name: formData.name,
+      customer_email: formData.email,
+      contact_phone: formData.phone,
+      service_date: localDateStr,
+      service_time: selectedTimeSlot,
+      total_price: totalPrice,
+      window_count: windowCount,
+      address: `${formData.street}${formData.suite ? ', ' + formData.suite : ''}`,
+      city: formData.postal,
+      postal_code: formData.postal,
+      payment_method: paymentMethod,
+      status: overrideStatus || 'pending'
+    }]);
+
+    setIsSubmitting(false);
+
+    if (error) {
+      console.error('Error creating booking:', error);
+      alert('Houve um erro ao agendar. Por favor, tente novamente.');
+      return;
+    }
+
+    const queryParams = new URLSearchParams({
+      name: formData.name,
+      date: localDateStr,
+      time: selectedTimeSlot,
+      windows: windowCount.toString(),
+      price: totalPrice.toString(),
+      address: `${formData.street}${formData.suite ? ', ' + formData.suite : ''}`
+    }).toString();
+
+    router.push(`/success?${queryParams}`);
+  };
+
+  const handleWindowChange = (e) => {
+    const val = parseInt(e.target.value) || 1;
+    setWindowCount(val);
+    setTotalPrice(val * 4);
+  };
+
+  if (!mounted) return null;
+
+  return (
+    <>
+      {/* Calculator Section */}
+      <section id="calculator" className="calculator-section fade-up visible">
+        <div className="container">
+          <div className="section-header">
+            <h2>Simulador de Preço</h2>
+            <p>Insira a quantidade de janelas/vidros e veja em tempo real quanto economiza ao escolher o nosso serviço especializado!</p>
+          </div>
+
+          <div className="calculator-box">
+            <div className="calculator-inputs">
+              <div className="input-group">
+                <label htmlFor="window-range" className="input-label-highlight" style={{ fontSize: '1.35rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                  👉 Insira aqui o número de janelas a limpar: 
+                  <span className="highlight-val" style={{ fontSize: '1.5rem', padding: '6px 18px' }}>{windowCount}</span>
+                </label>
+                <div className="slider-wrapper" style={{ marginTop: '16px' }}>
+                  <input type="range" min="1" max="100" value={windowCount} onChange={handleWindowChange} className="window-slider" />
+                  <input type="number" min="1" max="100" value={windowCount} onChange={handleWindowChange} className="window-number-input" />
+                </div>
+                
+                <div className="window-counting-info" style={{ marginTop: '20px', backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '16px', fontSize: '0.9rem', textAlign: 'left', boxShadow: 'var(--shadow-sm)' }}>
+                  <strong style={{ color: 'var(--text-main)', display: 'flex', marginBottom: '10px', fontSize: '0.95rem', alignItems: 'center', gap: '6px' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary)' }}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    Como contamos as janelas?
+                  </strong>
+                  <p style={{ color: 'var(--text-muted)', lineHeight: '1.5', margin: '0 0 10px 0' }}>
+                    Cobramos por <strong>janela/estrutura completa</strong> e não por painéis ou divisórias internas. Veja como deve contar:
+                  </p>
+                  <ul style={{ color: 'var(--text-muted)', margin: '0', paddingLeft: '20px', lineHeight: '1.6' }}>
+                    <li style={{ marginBottom: '8px' }}><strong>Moldura única com divisões:</strong> Se a sua janela ou porta possui vários vidros separados por divisórias (de metal ou madeira), mas está toda contida em <strong>uma única moldura principal</strong>, conta como apenas <strong>1 janela</strong>.</li>
+                    <li style={{ marginBottom: '8px' }}><strong>Janelas de duas partes (guilhotina ou correr):</strong> Se possui uma janela dividida em duas partes estruturais independentes (ex: uma parte móvel que abre/desliza e uma parte fixa, ou uma parte superior e outra inferior), cada parte conta como <strong>1 janela</strong> (total de 2).</li>
+                    <li style={{ marginBottom: '0' }}><strong>Montras ou Paredes de Vidro:</strong> Em fachadas comerciais ou paredes cobertas de vidro, cada painel individual delimitado pela sua própria estrutura/caixilho conta como <strong>1 janela</strong>.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="chart-wrapper-vertical">
+              <div className="chart-column competitor">
+                <div className="column-track">
+                  <div className="column-fill" style={{ height: '70%' }}><span>€{windowCount * 10}</span></div>
+                </div>
+                <div className="column-label">Média Concorrência<br />(€10/janela)</div>
+              </div>
+
+              <div className="chart-column regular">
+                <div className="column-track">
+                  <div className="column-fill" style={{ height: '50%' }}><span>€{windowCount * 7}</span></div>
+                </div>
+                <div className="column-label">Preço Regular<br />(€7/janela)</div>
+              </div>
+
+              <div className="chart-column discount">
+                <div className="column-track">
+                  <div className="column-fill" style={{ height: '30%' }}><span>€{totalPrice}</span></div>
+                </div>
+                <div className="column-label">O Seu Preço (Oferta!)<br />(€4/janela)</div>
+              </div>
+            </div>
+
+            <div className="savings-callout">
+              <h3>Total a Pagar: <span className="text-secondary">€{totalPrice}</span></h3>
+              <p>Você economiza <strong style={{ color: 'var(--secondary)' }}>€{windowCount * 6}</strong> em relação à concorrência ao aproveitar a oferta da primeira limpeza!</p>
+            </div>
+            
+            <div style={{ textAlign: 'center', marginTop: '32px' }}>
+              <a href="#calendar" className="btn btn-primary">Avançar para Agendamento</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Calendar Section */}
+      <section id="calendar" className="calendar-section fade-up visible">
+        <div className="container">
+          <div className="calendar-box">
+            <div className="calendar-header">
+              <h2>Agendamento Online</h2>
+              <p>Reserve o seu horário de forma rápida e 100% online.</p>
+            </div>
+            
+            <div className="booking-progress">
+              <div className={`progress-step ${step >= 1 ? 'active' : ''}`}>1. Data e Hora</div>
+              <div className={`progress-step ${step >= 2 ? 'active' : ''}`}>2. Detalhes e Morada</div>
+              <div className={`progress-step ${step >= 3 ? 'active' : ''}`}>3. Pagamento</div>
+              <div className={`progress-step ${step >= 4 ? 'active' : ''}`}>4. Confirmação</div>
+            </div>
+
+            <div className="booking-steps-container">
+              {step === 1 && (
+                <div className="booking-step-content active">
+                  <div className="calendar-flex">
+                    <div className="calendar-widget">
+                      <div className="calendar-month-header">
+                        <button type="button" className="btn-icon" onClick={() => setCurrentMonthDate(new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() - 1, 1))}>&lt;</button>
+                        <span style={{ textTransform: 'capitalize' }}>{currentMonthDate.toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' })}</span>
+                        <button type="button" className="btn-icon" onClick={() => setCurrentMonthDate(new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 1))}>&gt;</button>
+                      </div>
+                      <div className="calendar-weekdays">
+                        <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                      </div>
+                      <div className="calendar-days-grid">
+                        {Array.from({ length: new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), 1).getDay() }).map((_, i) => (
+                          <div key={`pad-${i}`} className="calendar-day-cell" style={{ visibility: 'hidden' }}></div>
+                        ))}
+                        {Array.from({ length: new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 0).getDate() }).map((_, i) => {
+                          const date = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), i + 1);
+                          const isPast = date < today;
+                          const isSelected = selectedDate && selectedDate.getTime() === date.getTime();
+                          return (
+                            <div 
+                              key={`day-${i}`} 
+                              className={`calendar-day-cell ${isPast ? 'disabled' : ''} ${isSelected ? 'selected' : ''}`}
+                              onClick={() => { if (!isPast) setSelectedDate(date); }}
+                            >
+                              {i + 1}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="time-slots-widget">
+                      <h3>Horários Disponíveis</h3>
+                      <div className="time-slots-grid" style={{ maxHeight: '300px', overflowY: 'auto', paddingRight: '10px' }}>
+                        {Array.from({ length: 35 }, (_, i) => {
+                          const hour = Math.floor(i / 2) + 5;
+                          const min = i % 2 === 0 ? '00' : '30';
+                          return `${hour.toString().padStart(2, '0')}:${min}`;
+                        }).map(time => {
+                          const newDuration = 30 + windowCount * 2;
+                          const newStart = timeToMinutes(time);
+                          const newEnd = newStart + newDuration;
+                          
+                          const isConflict = existingBookings.some(b => {
+                            const bStart = timeToMinutes(b.service_time);
+                            const bDuration = 30 + (b.window_count || 4) * 2;
+                            const bEnd = bStart + bDuration;
+                            
+                            // Check overlap condition
+                            return (newStart < bEnd) && (newEnd > bStart);
+                          });
+
+                          return (
+                            <button 
+                              key={time} 
+                              type="button" 
+                              disabled={isConflict}
+                              className={`time-slot-btn ${selectedTimeSlot === time ? 'selected' : ''}`}
+                              onClick={() => setSelectedTimeSlot(time)}
+                              style={{
+                                backgroundColor: selectedTimeSlot === time ? 'var(--primary)' : (isConflict ? '#f1f5f9' : ''),
+                                color: selectedTimeSlot === time ? '#fff' : (isConflict ? '#94a3b8' : ''),
+                                borderColor: selectedTimeSlot === time ? 'var(--primary)' : (isConflict ? '#e2e8f0' : ''),
+                                cursor: isConflict ? 'not-allowed' : 'pointer',
+                                opacity: isConflict ? 0.6 : 1,
+                                textDecoration: isConflict ? 'line-through' : 'none'
+                              }}
+                            >
+                              {time}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div className="slot-summary-box" style={{ display: 'none' }}>
+                        <p>Duração estimada: <strong>8 minutos</strong></p>
+                        <p>Horário: <strong>14:00 às 14:08</strong></p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="step-actions" style={{ marginTop: '32px', display: 'flex', justifyContent: 'flex-end' }}>
+                    <button type="button" className="btn btn-primary" onClick={() => setStep(2)}>Continuar</button>
+                  </div>
+                </div>
+              )}
+
+              {step === 2 && (
+                <div className="booking-step-content active">
+                  <form className="details-form" style={{ marginTop: '24px' }}>
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="cust-name">Nome Completo *</label>
+                        <input type="text" id="cust-name" required placeholder="Ex: João Silva" className="form-input-field" value={formData.name} onChange={handleInputChange} />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="cust-email">Email</label>
+                        <input type="email" id="cust-email" placeholder="Ex: joao@email.com" className="form-input-field" value={formData.email} onChange={handleInputChange} />
+                      </div>
+                    </div>
+                    <div className="form-group" style={{ marginTop: '16px' }}>
+                      <label htmlFor="cust-phone">Telemóvel / Contacto *</label>
+                      <input type="tel" id="cust-phone" required placeholder="Ex: 912 345 678" className="form-input-field" value={formData.phone} onChange={handleInputChange} />
+                    </div>
+                    <div className="form-group" style={{ marginTop: '16px' }}>
+                      <label htmlFor="cust-street">Rua e Número da Porta *</label>
+                      <input type="text" id="cust-street" required placeholder="Ex: Rua das Flores, nº 15" className="form-input-field" value={formData.street} onChange={handleInputChange} />
+                    </div>
+                    <div className="form-row" style={{ marginTop: '16px' }}>
+                      <div className="form-group">
+                        <label htmlFor="cust-postal">Código Postal *</label>
+                        <input type="text" id="cust-postal" required placeholder="Ex: 4000-000" className="form-input-field" value={formData.postal} onChange={handleInputChange} />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="cust-suite">Andar / Apartamento (opcional)</label>
+                        <input type="text" id="cust-suite" placeholder="Ex: 3º Esquerdo" className="form-input-field" value={formData.suite} onChange={handleInputChange} />
+                      </div>
+                    </div>
+                    <p className="form-warning-note" style={{ marginTop: '24px', color: 'var(--primary)', fontWeight: '600' }}>⚠️ Importante: Certifique-se de que estará em casa no dia e horário agendados para receber o nosso profissional.</p>
+                  </form>
+                  <div className="step-actions" style={{ marginTop: '32px', display: 'flex', justifyContent: 'space-between' }}>
+                    <button type="button" className="btn btn-outline" onClick={() => setStep(1)}>Voltar</button>
+                    <button type="button" className="btn btn-primary" onClick={() => setStep(3)}>Prosseguir para Pagamento</button>
+                  </div>
+                </div>
+              )}
+
+              {step === 3 && (
+                <div className="booking-step-content active">
+                  <div className="payment-widget" style={{ marginTop: '24px' }}>
+                    <div className="booking-summary-preview">
+                      <h3>Resumo do Serviço</h3>
+                      <p>Serviço: <strong>Limpeza de Vidros Impporta</strong></p>
+                      <p>Janelas: <strong>{windowCount} janelas</strong></p>
+                      <p>Data/Hora: <strong>{selectedDate ? selectedDate.toLocaleDateString('pt-PT') : ''} às {selectedTimeSlot || '?'}</strong></p>
+                      <p>Duração estimada: <strong>{30 + windowCount * 2} min</strong></p>
+                      <p className="total-preview-cost">Total: <strong>€{totalPrice}</strong></p>
+                    </div>
+
+                    <div className="payment-methods" style={{ marginTop: '24px' }}>
+                      <h3>Método de Pagamento</h3>
+                      <div className="payment-method-options" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
+                        <label className={`pm-option ${paymentMethod === 'online' ? 'active' : ''}`}>
+                          <input type="radio" name="payment-method" value="online" checked={paymentMethod === 'online'} onChange={(e) => setPaymentMethod(e.target.value)} />
+                          <div className="pm-info">
+                            <span className="pm-title">💳 Cartão de Crédito / Débito (Online)</span>
+                            <p>Pague online de forma 100% segura.</p>
+                          </div>
+                        </label>
+                        <label className={`pm-option ${paymentMethod === 'mbway' ? 'active' : ''}`}>
+                          <input type="radio" name="payment-method" value="mbway" checked={paymentMethod === 'mbway'} onChange={(e) => setPaymentMethod(e.target.value)} />
+                          <div className="pm-info">
+                            <span className="pm-title" style={{ display: 'flex', alignItems: 'center' }}>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ marginRight: '8px', flexShrink: 0 }}>
+                                <path d="M4 7 v-2 a2 2 0 0 1 2 -2 h12 a2 2 0 0 1 2 2 v2" stroke="#E31837" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M4 17 v2 a2 2 0 0 0 2 2 h12 a2 2 0 0 0 2 -2 v-2" stroke="#E31837" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <text x="12" y="16.5" fill="#000" fontSize="13" fontWeight="900" fontFamily="Arial, sans-serif" textAnchor="middle">MB</text>
+                              </svg>
+                              MB Way
+                            </span>
+                            <p>Receba a notificação de pagamento diretamente no telemóvel.</p>
+                          </div>
+                        </label>
+                        <label className={`pm-option ${paymentMethod === 'cash' ? 'active' : ''}`}>
+                          <input type="radio" name="payment-method" value="cash" checked={paymentMethod === 'cash'} onChange={(e) => setPaymentMethod(e.target.value)} />
+                          <div className="pm-info">
+                            <span className="pm-title">💵 Pagamento em mãos (Dinheiro / Cartão)</span>
+                            <p>Efetue o pagamento diretamente ao profissional no dia da limpeza.</p>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {(paymentMethod === 'online' || paymentMethod === 'mbway') ? (
+                    clientSecret ? (
+                      <Elements stripe={stripePromise} options={{ clientSecret }}>
+                        <CheckoutForm 
+                          amount={totalPrice} 
+                          onBack={() => setStep(2)} 
+                          onSuccess={() => handleFinalizeBooking(null, 'paid')} 
+                        />
+                      </Elements>
+                    ) : (
+                      <div style={{ marginTop: '24px', textAlign: 'center' }}>A carregar sistema de pagamento seguro...</div>
+                    )
+                  ) : (
+                    <div className="step-actions" style={{ marginTop: '32px', display: 'flex', justifyContent: 'space-between' }}>
+                      <button type="button" className="btn btn-outline" onClick={() => setStep(2)}>Voltar</button>
+                      <button type="button" className="btn btn-primary" onClick={() => handleFinalizeBooking(null, 'pending')} disabled={isSubmitting}>
+                        {isSubmitting ? 'A processar...' : 'Confirmar e Finalizar'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}

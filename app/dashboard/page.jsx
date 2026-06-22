@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import BookingWidget from '../../components/BookingWidget';
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
@@ -29,23 +30,7 @@ export default function DashboardPage() {
       if (!error && data && data.length > 0) {
         setBookings(data);
       } else {
-        const today = new Date();
-        const formatYMD = (date) => date.toISOString().split('T')[0];
-        setBookings([
-          {
-            id: 1,
-            customer_name: session.user.user_metadata?.full_name || "Cliente",
-            address: "Rua Exemplo 123",
-            city: "Lisboa",
-            property_type: "apartamento",
-            room_count: 3,
-            window_count: 6,
-            service_date: formatYMD(today),
-            service_time: "10:00",
-            total_price: 45.00,
-            status: "confirmed"
-          }
-        ]);
+        setBookings([]);
       }
       setLoading(false);
     };
@@ -124,6 +109,11 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
+        </div>
+
+        <div style={{ marginTop: '64px' }}>
+          <h2 style={{ textAlign: 'center', marginBottom: '32px' }}>Novo Agendamento</h2>
+          <BookingWidget />
         </div>
       </div>
     </main>
