@@ -51,14 +51,14 @@ export default function Home() {
     // Create booking in Supabase
     const { error } = await supabase.from('bookings').insert([{
       customer_name: formData.name,
-      email: formData.email,
-      customer_phone: formData.phone,
-      booking_date: localDateStr,
-      time_slot: selectedTimeSlot,
+      contact_email: formData.email,
+      contact_phone: formData.phone,
+      service_date: localDateStr,
+      service_time: selectedTimeSlot,
       total_price: totalPrice,
       window_count: windowCount,
-      street_address: `${formData.street}${formData.suite ? ', ' + formData.suite : ''}`,
-      postal_code: formData.postal,
+      address: `${formData.street}${formData.suite ? ', ' + formData.suite : ''}`,
+      city: formData.postal,
       payment_method: paymentMethod,
       status: 'pending'
     }]);
