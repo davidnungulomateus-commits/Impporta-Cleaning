@@ -234,7 +234,7 @@ export default function Home() {
             </button>
           </div>
           
-          <div style={{ marginTop: '20px', fontSize: '0.9rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: '500', background: 'rgba(0, 112, 243, 0.05)', padding: '8px 16px', borderRadius: '20px', display: 'inline-flex' }}>
+          <div style={{ marginTop: '20px', marginBottom: '32px', fontSize: '0.9rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: '500', background: 'rgba(0, 112, 243, 0.05)', padding: '8px 16px', borderRadius: '20px', display: 'inline-flex' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary)' }}><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
             <span>A nossa app mobile (iOS e Android) chegará em breve!</span>
           </div>
