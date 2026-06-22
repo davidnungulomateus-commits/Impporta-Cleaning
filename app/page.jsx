@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import confetti from 'canvas-confetti';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState(1);
   const [windowCount, setWindowCount] = useState(4);
@@ -100,7 +102,16 @@ export default function Home() {
       return;
     }
 
-    setStep(4);
+    const queryParams = new URLSearchParams({
+      name: formData.name,
+      date: localDateStr,
+      time: selectedTimeSlot,
+      windows: windowCount.toString(),
+      price: totalPrice.toString(),
+      address: `${formData.street}${formData.suite ? ', ' + formData.suite : ''}`
+    }).toString();
+
+    router.push(`/success?${queryParams}`);
   };
 
   const handleWindowChange = (e) => {
@@ -512,32 +523,7 @@ export default function Home() {
                 </div>
               )}
 
-              {step === 4 && (
-                <div className="booking-step-content active">
-                  <div className="success-widget" style={{ textAlign: 'center', padding: '40px 20px' }}>
-                    <div className="success-icon" style={{ width: '80px', height: '80px', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
-                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--secondary)' }}><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    </div>
-                    <h2 style={{ fontSize: '2.25rem', fontWeight: '700', marginBottom: '8px' }}>Agendamento Confirmado!</h2>
-                    <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>O seu pedido foi registado com sucesso. Guarde o resumo do seu agendamento:</p>
-                    
-                    <div className="receipt-box">
-                      <div className="receipt-row"><span>Nº do Serviço:</span><strong>#IMP-94827</strong></div>
-                      <div className="receipt-row"><span>Cliente:</span><strong>João Silva</strong></div>
-                      <div className="receipt-row"><span>Contacto:</span><strong>912 345 678</strong></div>
-                      <div className="receipt-row"><span>Morada:</span><strong>Rua das Flores, nº 15, Porto</strong></div>
-                      <div className="receipt-row"><span>Quantidade de Vidros:</span><strong>{windowCount} janelas</strong></div>
-                      <div className="receipt-row"><span>Duração Estimada:</span><strong>{windowCount * 2} minutos (14:00 às 14:08)</strong></div>
-                      <div className="receipt-row"><span>Método Escolhido:</span><strong>Pagamento em Mãos</strong></div>
-                      <div className="receipt-row total"><span>Total Pago / A Pagar:</span><strong>€{totalPrice}</strong></div>
-                    </div>
 
-                    <div className="success-actions" style={{ marginTop: '32px' }}>
-                      <button type="button" className="btn btn-primary" onClick={() => setStep(1)}>Fazer Novo Agendamento</button>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
