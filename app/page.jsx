@@ -4,6 +4,11 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import confetti from 'canvas-confetti';
 import { useRouter } from 'next/navigation';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import CheckoutForm from '../components/CheckoutForm';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 export default function Home() {
   const router = useRouter();
@@ -31,18 +36,104 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [supportCount, setSupportCount] = useState(0);
   const [hasSupported, setHasSupported] = useState(false);
+  const [clientSecret, setClientSecret] = useState('');
+
+  useEffect(() => {
+    if (step === 3 && (paymentMethod === 'online' || paymentMethod === 'mbway') && totalPrice > 0) {
+      setClientSecret('');
+      fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          amount: totalPrice,
+          paymentMethodType: paymentMethod === 'online' ? 'card' : 'mb_way',
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => setClientSecret(data.clientSecret))
+        .catch((err) => console.error("Error fetching intent:", err));
+    }
+  }, [step, paymentMethod, totalPrice]);
 
   useEffect(() => {
     setMounted(true);
-    // Fetch initial support count
-    const fetchSupportCount = async () => {
+    
+    // Restore state if coming back from Google Auth
+    const restoreState = () => {
+      const savedState = sessionStorage.getItem('impporta_booking_state');
+      if (savedState) {
+        try {
+          const parsed = JSON.parse(savedState);
+          if (parsed.windowCount) setWindowCount(parsed.windowCount);
+          if (parsed.totalPrice) setTotalPrice(parsed.totalPrice);
+          if (parsed.selectedTimeSlot) setSelectedTimeSlot(parsed.selectedTimeSlot);
+          if (parsed.selectedDate) setSelectedDate(new Date(parsed.selectedDate));
+          if (parsed.step) setStep(parsed.step);
+          
+          // Scroll to calendar section
+          setTimeout(() => {
+            document.getElementById('calendar')?.scrollIntoView({ behavior: 'smooth' });
+          }, 500);
+        } catch (e) {
+          console.error("Error restoring state", e);
+        }
+        sessionStorage.removeItem('impporta_booking_state');
+      }
+    };
+    restoreState();
+
+    const fetchSessionAndSupport = async () => {
+      // Fetch session for autofill
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && session.user) {
+        setFormData(prev => ({
+          ...prev,
+          name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || prev.name,
+          email: session.user.email || prev.email,
+          phone: session.user.user_metadata?.phone || session.user.phone || prev.phone
+        }));
+      }
+
+      // Fetch initial support count
       const { data, error } = await supabase.from('support_stats').select('count').eq('id', 1).single();
       if (data && !error) {
         setSupportCount(data.count);
       }
     };
-    fetchSupportCount();
+    fetchSessionAndSupport();
   }, []);
+
+  const handleGoogleFill = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session && session.user) {
+      setFormData(prev => ({
+        ...prev,
+        name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || prev.name,
+        email: session.user.email || prev.email,
+        phone: session.user.user_metadata?.phone || session.user.phone || prev.phone
+      }));
+      return;
+    }
+
+    // Save current booking state before redirecting to Google
+    sessionStorage.setItem('impporta_booking_state', JSON.stringify({
+      step: 2,
+      windowCount,
+      totalPrice,
+      selectedDate: selectedDate ? selectedDate.toISOString() : null,
+      selectedTimeSlot,
+    }));
+
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+  };
 
   const handleSupportClick = async () => {
     if (hasSupported) return;
@@ -66,7 +157,7 @@ export default function Home() {
     setFormData(prev => ({ ...prev, [id.replace('cust-', '')]: value }));
   };
 
-  const handleFinalizeBooking = async () => {
+  const handleFinalizeBooking = async (e, overrideStatus = null) => {
     if (!selectedDate || !selectedTimeSlot) {
       alert("Por favor, selecione uma data e horário no Passo 1.");
       setStep(1);
@@ -91,7 +182,7 @@ export default function Home() {
       city: formData.postal,
       postal_code: formData.postal,
       payment_method: paymentMethod,
-      status: 'pending'
+      status: overrideStatus || 'pending'
     }]);
 
     setIsSubmitting(false);
@@ -396,7 +487,12 @@ export default function Home() {
               {step === 2 && (
                 <div className="booking-step-content active">
                   <div className="google-auth-container" style={{ marginTop: '24px', textAlign: 'center', paddingBottom: '24px', borderBottom: '1px solid var(--border)' }}>
-                    <button type="button" className="btn btn-outline" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontWeight: '600' }}>
+                    <button 
+                      type="button" 
+                      className="btn btn-outline" 
+                      onClick={handleGoogleFill}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontWeight: '600' }}
+                    >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                       Preencher rapidamente com Google
                     </button>
@@ -466,7 +562,14 @@ export default function Home() {
                         <label className={`pm-option ${paymentMethod === 'mbway' ? 'active' : ''}`}>
                           <input type="radio" name="payment-method" value="mbway" checked={paymentMethod === 'mbway'} onChange={(e) => setPaymentMethod(e.target.value)} />
                           <div className="pm-info">
-                            <span className="pm-title">📱 MB Way</span>
+                            <span className="pm-title" style={{ display: 'flex', alignItems: 'center' }}>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ marginRight: '8px', flexShrink: 0 }}>
+                                <path d="M4 7 v-2 a2 2 0 0 1 2 -2 h12 a2 2 0 0 1 2 2 v2" stroke="#E31837" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M4 17 v2 a2 2 0 0 0 2 2 h12 a2 2 0 0 0 2 -2 v-2" stroke="#E31837" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <text x="12" y="16.5" fill="#000" fontSize="13" fontWeight="900" fontFamily="Arial, sans-serif" textAnchor="middle">MB</text>
+                              </svg>
+                              MB Way
+                            </span>
                             <p>Receba a notificação de pagamento diretamente no telemóvel.</p>
                           </div>
                         </label>
@@ -478,43 +581,29 @@ export default function Home() {
                           </div>
                         </label>
                       </div>
-
-                      {paymentMethod === 'online' && (
-                        <div className="card-details-fields" style={{ marginTop: '20px' }}>
-                          <div className="form-group">
-                            <label htmlFor="card-num">Número do Cartão</label>
-                            <input type="text" id="card-num" placeholder="0000 0000 0000 0000" className="form-input-field" />
-                          </div>
-                          <div className="form-row" style={{ marginTop: '12px' }}>
-                            <div className="form-group">
-                              <label htmlFor="card-expiry">Validade</label>
-                              <input type="text" id="card-expiry" placeholder="MM/AA" className="form-input-field" />
-                            </div>
-                            <div className="form-group">
-                              <label htmlFor="card-cvc">CVC</label>
-                              <input type="text" id="card-cvc" placeholder="000" className="form-input-field" />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {paymentMethod === 'mbway' && (
-                        <div className="mbway-details-fields" style={{ marginTop: '20px' }}>
-                          <div className="form-group">
-                            <label htmlFor="mbway-phone">Número de Telemóvel MBWay</label>
-                            <input type="tel" id="mbway-phone" placeholder="910 000 000" className="form-input-field" />
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
 
-                  <div className="step-actions" style={{ marginTop: '32px', display: 'flex', justifyContent: 'space-between' }}>
-                    <button type="button" className="btn btn-outline" onClick={() => setStep(2)}>Voltar</button>
-                    <button type="button" className="btn btn-primary" onClick={handleFinalizeBooking} disabled={isSubmitting}>
-                      {isSubmitting ? 'A processar...' : 'Confirmar e Finalizar'}
-                    </button>
-                  </div>
+                  {(paymentMethod === 'online' || paymentMethod === 'mbway') ? (
+                    clientSecret ? (
+                      <Elements stripe={stripePromise} options={{ clientSecret }}>
+                        <CheckoutForm 
+                          amount={totalPrice} 
+                          onBack={() => setStep(2)} 
+                          onSuccess={() => handleFinalizeBooking(null, 'paid')} 
+                        />
+                      </Elements>
+                    ) : (
+                      <div style={{ marginTop: '24px', textAlign: 'center' }}>A carregar sistema de pagamento seguro...</div>
+                    )
+                  ) : (
+                    <div className="step-actions" style={{ marginTop: '32px', display: 'flex', justifyContent: 'space-between' }}>
+                      <button type="button" className="btn btn-outline" onClick={() => setStep(2)}>Voltar</button>
+                      <button type="button" className="btn btn-primary" onClick={() => handleFinalizeBooking(null, 'pending')} disabled={isSubmitting}>
+                        {isSubmitting ? 'A processar...' : 'Confirmar e Finalizar'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 

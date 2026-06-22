@@ -3,6 +3,11 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import Link from 'next/link';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import AdminCheckoutForm from '../../components/AdminCheckoutForm';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 export default function AdminCalendarPage() {
   const [user, setUser] = useState(null);
@@ -13,6 +18,12 @@ export default function AdminCalendarPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [newBookingData, setNewBookingData] = useState({});
   const [draggedBooking, setDraggedBooking] = useState(null);
+
+  // Payment states
+  const [paymentAction, setPaymentAction] = useState(null);
+  const [adminClientSecret, setAdminClientSecret] = useState('');
+  const [adminPaymentLink, setAdminPaymentLink] = useState('');
+  const [isGeneratingPayment, setIsGeneratingPayment] = useState(false);
 
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -155,6 +166,50 @@ export default function AdminCalendarPage() {
         setSelectedBooking(prev => ({ ...prev, status: 'pending' }));
       }
     }
+  };
+
+  const handleUpdateBooking = async (id, field, value) => {
+    const { error } = await supabase.from('bookings').update({ [field]: value }).eq('id', id);
+    if (!error) {
+      setBookings(prev => prev.map(b => b.id === id ? { ...b, [field]: value } : b));
+      if (selectedBooking && selectedBooking.id === id) {
+        setSelectedBooking(prev => ({ ...prev, [field]: value }));
+      }
+    }
+  };
+
+  const handleGeneratePayment = async (type) => {
+    setIsGeneratingPayment(true);
+    setPaymentAction(type);
+    setAdminClientSecret('');
+    setAdminPaymentLink('');
+
+    try {
+      const response = await fetch('/api/admin-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: type === 'mbway' ? 'create_intent' : 'generate_link',
+          amount: selectedBooking.total_price,
+          booking_id: selectedBooking.id,
+          name: selectedBooking.customer_name,
+          email: selectedBooking.customer_email,
+          phone: selectedBooking.contact_phone
+        })
+      });
+      const data = await response.json();
+      
+      if (type === 'mbway') {
+        setAdminClientSecret(data.clientSecret);
+      } else {
+        setAdminPaymentLink(data.url);
+      }
+    } catch (err) {
+      console.error("Payment error:", err);
+      alert("Erro ao gerar pagamento.");
+      setPaymentAction(null);
+    }
+    setIsGeneratingPayment(false);
   };
 
   const handleDayClick = (date) => {
@@ -469,8 +524,26 @@ export default function AdminCalendarPage() {
               <div className="detail-grid">
                 <div className="detail-group">
                   <label>Data & Hora</label>
-                  <div className="detail-val">{new Date(selectedBooking.service_date).toLocaleDateString('pt-PT')}</div>
-                  <div className="detail-subval">{selectedBooking.service_time}</div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input 
+                      type="date" 
+                      className="form-input" 
+                      style={{ flex: 1, padding: '4px 8px', fontSize: '0.9rem' }} 
+                      value={selectedBooking.service_date || ''} 
+                      onChange={(e) => handleUpdateBooking(selectedBooking.id, 'service_date', e.target.value)}
+                    />
+                    <select 
+                      className="form-input" 
+                      style={{ flex: 1, padding: '4px 8px', fontSize: '0.9rem' }} 
+                      value={selectedBooking.service_time || ''} 
+                      onChange={(e) => handleUpdateBooking(selectedBooking.id, 'service_time', e.target.value)}
+                    >
+                      <option value="">Hora</option>
+                      {Array.from({ length: 18 }, (_, i) => `${(i + 5).toString().padStart(2, '0')}:00`).map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 <div className="detail-group">
                   <label>Imóvel & Vidros</label>
@@ -489,34 +562,104 @@ export default function AdminCalendarPage() {
               </div>
             </div>
 
-            <div className="modal-actions" style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <button 
-                className="btn" 
-                style={{ width: '100%', backgroundColor: '#25D366', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                onClick={() => handleWhatsApp(selectedBooking)}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
-                </svg>
-                Conversar no WhatsApp
-              </button>
+            <div className="modal-actions" style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              
+              {selectedBooking.status !== 'paid' && !paymentAction && selectedBooking.status !== 'cancelled' && (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    className="btn btn-primary" 
+                    style={{ flex: 1, backgroundColor: '#0070f3', borderColor: '#0070f3', fontSize: '0.85rem', padding: '8px' }}
+                    onClick={() => handleGeneratePayment('link')}
+                    disabled={isGeneratingPayment}
+                  >
+                    {isGeneratingPayment ? '...' : 'Cobrar (Link)'}
+                  </button>
+                  <button 
+                    className="btn btn-primary" 
+                    style={{ flex: 1, backgroundColor: '#ea4c89', borderColor: '#ea4c89', fontSize: '0.85rem', padding: '8px' }}
+                    onClick={() => handleGeneratePayment('mbway')}
+                    disabled={isGeneratingPayment}
+                  >
+                    {isGeneratingPayment ? '...' : 'Cobrar (MB Way)'}
+                  </button>
+                </div>
+              )}
 
-              {selectedBooking.status !== 'cancelled' ? (
+              {paymentAction === 'mbway' && adminClientSecret && (
+                <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem' }}>Cobrar via MB Way</h4>
+                  <Elements stripe={stripePromise} options={{ clientSecret: adminClientSecret }}>
+                    <AdminCheckoutForm 
+                      amount={selectedBooking.total_price} 
+                      onCancel={() => setPaymentAction(null)}
+                      onSuccess={() => {
+                        handleUpdateBooking(selectedBooking.id, 'status', 'paid');
+                        setPaymentAction(null);
+                        alert("Pagamento concluído com sucesso!");
+                      }} 
+                    />
+                  </Elements>
+                </div>
+              )}
+
+              {paymentAction === 'link' && adminPaymentLink && (
+                <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem' }}>Link Gerado!</h4>
+                  <input type="text" readOnly value={adminPaymentLink} className="form-input" style={{ width: '100%', padding: '8px', marginBottom: '12px', fontSize: '0.85rem', backgroundColor: '#fff' }} />
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      className="btn" 
+                      style={{ flex: 1, backgroundColor: '#25D366', color: '#fff', fontSize: '0.85rem', padding: '8px' }}
+                      onClick={() => {
+                        const message = encodeURIComponent(`Olá ${selectedBooking.customer_name}, o link para o pagamento do seu agendamento (Valor: €${selectedBooking.total_price}) é: ${adminPaymentLink}`);
+                        window.open(`https://wa.me/351${selectedBooking.contact_phone.replace(/\D/g, '')}?text=${message}`, '_blank');
+                      }}
+                    >
+                      Enviar WhatsApp
+                    </button>
+                    <button 
+                      className="btn btn-outline" 
+                      style={{ flex: 1, fontSize: '0.85rem', padding: '8px' }}
+                      onClick={() => {
+                        const subject = encodeURIComponent('Link de Pagamento - Impporta Limpezas');
+                        const body = encodeURIComponent(`Olá ${selectedBooking.customer_name},\n\nO link para o pagamento do seu agendamento (Valor: €${selectedBooking.total_price}) é:\n${adminPaymentLink}\n\nObrigado,\nImpporta Limpezas`);
+                        window.open(`mailto:${selectedBooking.customer_email}?subject=${subject}&body=${body}`, '_blank');
+                      }}
+                    >
+                      Enviar Email
+                    </button>
+                  </div>
+                  <button className="btn btn-outline" style={{ width: '100%', marginTop: '8px', fontSize: '0.85rem', padding: '8px' }} onClick={() => setPaymentAction(null)}>
+                    Voltar
+                  </button>
+                </div>
+              )}
+
+              {!paymentAction && (
+                <button 
+                  className="btn" 
+                  style={{ width: '100%', backgroundColor: '#25D366', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                  onClick={() => handleWhatsApp(selectedBooking)}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+                  </svg>
+                  Conversar no WhatsApp
+                </button>
+              )}
+
+              {!paymentAction && selectedBooking.status !== 'cancelled' ? (
                 <button 
                   className="btn btn-outline" 
                   style={{ width: '100%', borderColor: '#ef4444', color: '#ef4444' }}
-                  onClick={() => {
-                    if (window.confirm("Tem a certeza que pretende cancelar este agendamento?")) {
-                      handleCancelBooking(selectedBooking.id);
-                    }
-                  }}
+                  onClick={() => handleCancelBooking(selectedBooking.id)}
                 >
                   Cancelar Agendamento
                 </button>
-              ) : (
+              ) : !paymentAction && selectedBooking.status === 'cancelled' && (
                 <button 
-                  className="btn btn-outline" 
-                  style={{ width: '100%', borderColor: 'var(--primary)', color: 'var(--primary)' }}
+                  className="btn btn-primary" 
+                  style={{ width: '100%' }}
                   onClick={() => handleRestoreBooking(selectedBooking.id)}
                 >
                   Restaurar Agendamento
