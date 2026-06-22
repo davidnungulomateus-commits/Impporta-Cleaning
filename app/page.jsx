@@ -7,6 +7,13 @@ export default function Home() {
   const [step, setStep] = useState(1);
   const [windowCount, setWindowCount] = useState(4);
   const [totalPrice, setTotalPrice] = useState(16);
+  
+  // Calendar State
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
+  const [currentMonthDate, setCurrentMonthDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
 
   useEffect(() => {
     setMounted(true);
@@ -225,24 +232,36 @@ export default function Home() {
                   <div className="calendar-flex">
                     <div className="calendar-widget">
                       <div className="calendar-month-header">
-                        <button type="button" className="btn-icon">&lt;</button>
-                        <span>Julho 2026</span>
-                        <button type="button" className="btn-icon">&gt;</button>
+                        <button type="button" className="btn-icon" onClick={() => setCurrentMonthDate(new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() - 1, 1))}>&lt;</button>
+                        <span style={{ textTransform: 'capitalize' }}>{currentMonthDate.toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' })}</span>
+                        <button type="button" className="btn-icon" onClick={() => setCurrentMonthDate(new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 1))}>&gt;</button>
                       </div>
                       <div className="calendar-weekdays">
                         <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
                       </div>
                       <div className="calendar-days-grid">
-                        {/* Static placeholder for days until we implement the full calendar logic */}
-                        <div className="calendar-day empty"></div><div className="calendar-day empty"></div><div className="calendar-day empty"></div>
-                        <div className="calendar-day past">1</div><div className="calendar-day past">2</div><div className="calendar-day past">3</div><div className="calendar-day past">4</div>
-                        <div className="calendar-day past">5</div><div className="calendar-day past">6</div><div className="calendar-day past">7</div><div className="calendar-day past">8</div>
-                        <div className="calendar-day past">9</div><div className="calendar-day past">10</div><div className="calendar-day past">11</div><div className="calendar-day past">12</div>
-                        <div className="calendar-day past">13</div><div className="calendar-day past">14</div><div className="calendar-day past">15</div><div className="calendar-day past">16</div>
-                        <div className="calendar-day past">17</div><div className="calendar-day past">18</div><div className="calendar-day past">19</div><div className="calendar-day past">20</div>
-                        <div className="calendar-day today available">21</div><div className="calendar-day available">22</div><div className="calendar-day available">23</div><div className="calendar-day available">24</div>
-                        <div className="calendar-day available">25</div><div className="calendar-day available">26</div><div className="calendar-day available">27</div><div className="calendar-day available">28</div>
-                        <div className="calendar-day available">29</div><div className="calendar-day available">30</div><div className="calendar-day available">31</div>
+                        {Array.from({ length: new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), 1).getDay() }).map((_, i) => (
+                          <div key={`pad-${i}`} className="calendar-day empty"></div>
+                        ))}
+                        {Array.from({ length: new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 0).getDate() }).map((_, i) => {
+                          const date = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), i + 1);
+                          const isPast = date < today;
+                          const isSelected = selectedDate && selectedDate.getTime() === date.getTime();
+                          return (
+                            <div 
+                              key={`day-${i}`} 
+                              className={`calendar-day ${isPast ? 'past' : 'available'} ${isSelected ? 'today selected' : ''}`}
+                              onClick={() => { if (!isPast) setSelectedDate(date); }}
+                              style={{ 
+                                cursor: isPast ? 'not-allowed' : 'pointer',
+                                backgroundColor: isSelected ? 'var(--primary)' : '',
+                                color: isSelected ? '#fff' : ''
+                              }}
+                            >
+                              {i + 1}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                     <div className="time-slots-widget">
