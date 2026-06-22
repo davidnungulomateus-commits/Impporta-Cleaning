@@ -266,13 +266,26 @@ export default function Home() {
                     </div>
                     <div className="time-slots-widget">
                       <h3>Horários Disponíveis</h3>
-                      <div className="time-slots-grid">
-                        <button type="button" className="time-slot-btn">09:00</button>
-                        <button type="button" className="time-slot-btn">10:30</button>
-                        <button type="button" className="time-slot-btn">12:00</button>
-                        <button type="button" className="time-slot-btn">14:00</button>
-                        <button type="button" className="time-slot-btn">15:30</button>
-                        <button type="button" className="time-slot-btn">17:00</button>
+                      <div className="time-slots-grid" style={{ maxHeight: '300px', overflowY: 'auto', paddingRight: '10px' }}>
+                        {Array.from({ length: 35 }, (_, i) => {
+                          const hour = Math.floor(i / 2) + 5;
+                          const min = i % 2 === 0 ? '00' : '30';
+                          return `${hour.toString().padStart(2, '0')}:${min}`;
+                        }).map(time => (
+                          <button 
+                            key={time} 
+                            type="button" 
+                            className={`time-slot-btn ${selectedTimeSlot === time ? 'selected' : ''}`}
+                            onClick={() => setSelectedTimeSlot(time)}
+                            style={{
+                              backgroundColor: selectedTimeSlot === time ? 'var(--primary)' : '',
+                              color: selectedTimeSlot === time ? '#fff' : '',
+                              borderColor: selectedTimeSlot === time ? 'var(--primary)' : ''
+                            }}
+                          >
+                            {time}
+                          </button>
+                        ))}
                       </div>
                       <div className="slot-summary-box" style={{ display: 'none' }}>
                         <p>Duração estimada: <strong>8 minutos</strong></p>
