@@ -2132,6 +2132,7 @@ footer {
   display: flex;
   position: relative;
   min-height: 800px;
+  padding-top: 16px; /* Prevents first hour label from clipping due to top: -10px */
 }
 
 .hour-column {
