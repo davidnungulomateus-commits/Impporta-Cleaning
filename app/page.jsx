@@ -54,7 +54,7 @@ export default function Home() {
       </section>
 
       {/* Antes e Depois */}
-      <section id="results" className="section-padding bg-alt">
+      <section id="results" className="section-padding bg-alt" style={{ display: 'none' }}>
         <div className="container">
           <div className="section-header fade-up visible">
             <span style={{ textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--primary)', fontWeight: '600', marginBottom: '8px', display: 'block' }}>Resultados</span>
