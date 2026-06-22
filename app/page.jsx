@@ -1,44 +1,12 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
-import confetti from 'canvas-confetti';
+import HeroInteractive from '../components/HeroInteractive';
 import BookingWidget from '../components/BookingWidget';
 
+export const metadata = {
+  title: 'Impporta - Limpeza de Vidros Lisboa',
+  description: 'Limpeza profissional e personalizada de vidros e janelas em Lisboa. Serviços para residências, escritórios e condomínios. Agende já a sua limpeza com a Impporta.',
+};
+
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
-  const [supportCount, setSupportCount] = useState(0);
-  const [hasSupported, setHasSupported] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-
-    const fetchSupport = async () => {
-      const { data, error } = await supabase.from('support_stats').select('count').eq('id', 1).single();
-      if (data && !error) {
-        setSupportCount(data.count);
-      }
-    };
-    fetchSupport();
-  }, []);
-
-  const handleSupportClick = async () => {
-    if (hasSupported) return;
-    setHasSupported(true);
-    setSupportCount(prev => prev + 1);
-
-    confetti({
-      particleCount: 150,
-      spread: 80,
-      origin: { y: 0.6 },
-      colors: ['#2e5cff', '#00e5ff', '#ffffff'] 
-    });
-
-    await supabase.rpc('increment_support_count');
-  };
-
-  if (!mounted) return null;
-
   return (
     <main>
       {/* Hero */}
@@ -46,34 +14,8 @@ export default function Home() {
         <div className="container">
           <h1>Limpeza <span className="text-secondary">personalizada</span> de vidros e janelas</h1>
           <p>Sinta a diferença com a Impporta — onde a transparência, o brilho e a sua tranquilidade vêm em primeiro lugar. Garantimos vidros impecáveis e seguros para o seu ambiente.</p>
-          <div className="hero-buttons">
-            <a href="#calculator" className="btn btn-primary">Agendar Já</a>
-            <button 
-              className={`btn btn-outline ${hasSupported ? 'supported' : ''}`} 
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: hasSupported ? 'default' : 'pointer', opacity: hasSupported ? 0.8 : 1 }}
-              onClick={handleSupportClick}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill={hasSupported ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
-              </svg>
-              {hasSupported ? 'Obrigado pelo apoio!' : 'Apoiar a Impporta'}
-            </button>
-          </div>
           
-          <div style={{ marginTop: '20px', marginBottom: '32px', fontSize: '0.9rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: '500', background: 'rgba(0, 112, 243, 0.05)', padding: '8px 16px', borderRadius: '20px', display: 'inline-flex' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary)' }}><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-            <span>A nossa app mobile (iOS e Android) chegará em breve!</span>
-          </div>
-          
-          <div className="stats">
-            <div className="stat-item fade-up visible" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '650px', margin: '0 auto' }}>
-              <div className="counter-container" style={{ position: 'relative', display: 'inline-block' }}>
-                <h3><span>{supportCount}</span><span className="text-secondary">+</span></h3>
-              </div>
-              <p className="stat-label">Clientes que nos apoiam</p>
-              <p className="stat-dream-quote" style={{ fontSize: '0.9rem', lineHeight: '1.5', opacity: 0.8 }}>"Somos uma equipa nova e jovem, mas carregamos o grande sonho de nos tornarmos a empresa número um em limpeza de vidros e janelas. A nossa dedicação e vontade de trabalhar são honestas e infinitas!"</p>
-            </div>
-          </div>
+          <HeroInteractive />
         </div>
       </section>
 
@@ -107,6 +49,44 @@ export default function Home() {
               <h3>Limpeza de Vidros para Supermercados e Shoppings</h3>
               <p>Garantimos vidros extremamente limpos em montras de shoppings, balcões refrigerados e portas de entrada de supermercados, valorizando a apresentação e visibilidade dos seus produtos.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Antes e Depois */}
+      <section id="results" className="section-padding bg-alt">
+        <div className="container">
+          <div className="section-header fade-up visible">
+            <span style={{ textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--primary)', fontWeight: '600', marginBottom: '8px', display: 'block' }}>Resultados</span>
+            <h2>Antes e Depois</h2>
+            <p>Veja com os seus próprios olhos a diferença que uma limpeza profissional pode fazer. A transparência perfeita transforma o seu espaço.</p>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginTop: '40px' }}>
+            {[1, 2, 3].map((item) => (
+              <div key={item} className="fade-up visible" style={{ background: 'var(--surface)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', height: '200px' }}>
+                  <div style={{ flex: 1, backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '2px solid white' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#999' }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                      <span style={{ fontSize: '0.8rem', marginTop: '8px', fontWeight: 'bold' }}>Foto em breve</span>
+                    </div>
+                  </div>
+                  <div style={{ flex: 1, backgroundColor: '#e5e5e5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#999' }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                      <span style={{ fontSize: '0.8rem', marginTop: '8px', fontWeight: 'bold' }}>Foto em breve</span>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ padding: '16px', textAlign: 'center', borderTop: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 10%', fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-muted)' }}>
+                    <span>Antes</span>
+                    <span>Depois</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
