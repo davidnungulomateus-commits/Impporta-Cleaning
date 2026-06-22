@@ -279,13 +279,13 @@ export default function AdminCalendarPage() {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const y = e.clientY - rect.top;
                   
-                  // 80px per hour, 40px per 30 mins
-                  const slots = Math.floor(y / 40);
-                  const hoursToAdd = Math.floor(slots / 2);
-                  const minutesToAdd = (slots % 2) * 30;
+                  // 80px per hour, 20px per 15 mins
+                  const slots = Math.floor(y / 20);
+                  const hoursToAdd = Math.floor(slots / 4);
+                  const minutesToAdd = (slots % 4) * 15;
                   
                   const droppedHour = Math.max(8, Math.min(20, 8 + hoursToAdd));
-                  const newTime = `${droppedHour.toString().padStart(2, '0')}:${minutesToAdd === 0 ? '00' : '30'}`;
+                  const newTime = `${droppedHour.toString().padStart(2, '0')}:${minutesToAdd.toString().padStart(2, '0')}`;
                   
                   if (draggedBooking.service_time !== newTime) {
                     setBookings(prev => prev.map(b => b.id === draggedBooking.id ? { ...b, service_time: newTime } : b));
