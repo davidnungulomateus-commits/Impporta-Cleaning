@@ -30,8 +30,8 @@ export default function AdminCalendarPage() {
       const { data, error } = await supabase
         .from('bookings')
         .select('*')
-        .order('service_date', { ascending: true })
-        .order('service_time', { ascending: true });
+        .order('booking_date', { ascending: true })
+        .order('time_slot', { ascending: true });
 
       if (!error && data && data.length > 0) {
         setBookings(data);
@@ -46,15 +46,15 @@ export default function AdminCalendarPage() {
           {
             id: 1,
             customer_name: "João Silva",
-            customer_email: "joao.silva@example.com",
-            contact_phone: "912345678",
+            email: "joao.silva@example.com",
+            customer_phone: "912345678",
             address: "Rua Augusta 123",
             postal_code: "1100-048",
             city: "Lisboa",
             property_type: "apartamento",
             window_count: 6,
-            service_date: formatYMD(today),
-            service_time: "10:00",
+            booking_date: formatYMD(today),
+            time_slot: "10:00",
             total_price: 45.00,
             payment_method: "MBWay",
             status: "confirmed"
@@ -62,15 +62,15 @@ export default function AdminCalendarPage() {
           {
             id: 2,
             customer_name: "Maria Santos",
-            customer_email: "maria.santos@example.com",
-            contact_phone: "934567890",
+            email: "maria.santos@example.com",
+            customer_phone: "934567890",
             address: "Avenida da Boavista 456",
             postal_code: "4100-123",
             city: "Porto",
             property_type: "moradia",
             window_count: 12,
-            service_date: formatYMD(today),
-            service_time: "14:30",
+            booking_date: formatYMD(today),
+            time_slot: "14:30",
             total_price: 90.00,
             payment_method: "Cartão",
             status: "confirmed"
@@ -78,15 +78,15 @@ export default function AdminCalendarPage() {
           {
             id: 3,
             customer_name: "Carlos Ferreira",
-            customer_email: "carlos.f@example.com",
-            contact_phone: "967890123",
+            email: "carlos.f@example.com",
+            customer_phone: "967890123",
             address: "Rua do Comércio 78",
             postal_code: "8000-000",
             city: "Faro",
             property_type: "apartamento",
             window_count: 4,
-            service_date: formatYMD(tomorrow),
-            service_time: "09:00",
+            booking_date: formatYMD(tomorrow),
+            time_slot: "09:00",
             total_price: 30.00,
             payment_method: "Numerário",
             status: "pending"
@@ -94,15 +94,15 @@ export default function AdminCalendarPage() {
           {
             id: 4,
             customer_name: "Ana Oliveira",
-            customer_email: "ana.oliveira@example.com",
-            contact_phone: "921234567",
+            email: "ana.oliveira@example.com",
+            customer_phone: "921234567",
             address: "Largo do Chiado 9",
             postal_code: "1200-108",
             city: "Lisboa",
             property_type: "escritorio",
             window_count: 8,
-            service_date: formatYMD(dayAfter),
-            service_time: "16:00",
+            booking_date: formatYMD(dayAfter),
+            time_slot: "16:00",
             total_price: 60.00,
             payment_method: "MBWay",
             status: "confirmed"
@@ -130,8 +130,8 @@ export default function AdminCalendarPage() {
 
   // Filter bookings for the currently selected day
   const dailyBookings = bookings.filter(b => {
-    if (!b.service_date) return false;
-    const bDate = new Date(b.service_date);
+    if (!b.booking_date) return false;
+    const bDate = new Date(b.booking_date);
     return isSameDay(bDate, currentDate);
   });
 
@@ -149,8 +149,8 @@ export default function AdminCalendarPage() {
 
   const handleWhatsApp = (booking) => {
     if (!booking) return;
-    const phone = booking.contact_phone ? booking.contact_phone.replace(/\D/g, '') : '';
-    const message = encodeURIComponent(`Olá ${booking.customer_name}, sou da Impporta Limpezas. Estou a contactar sobre o seu agendamento para o dia ${new Date(booking.service_date).toLocaleDateString('pt-PT')}.`);
+    const phone = booking.customer_phone ? booking.customer_phone.replace(/\D/g, '') : '';
+    const message = encodeURIComponent(`Olá ${booking.customer_name}, sou da Impporta Limpezas. Estou a contactar sobre o seu agendamento para o dia ${new Date(booking.booking_date).toLocaleDateString('pt-PT')}.`);
     const link = `https://wa.me/351${phone}?text=${message}`;
     window.open(link, '_blank');
   };
@@ -209,7 +209,7 @@ export default function AdminCalendarPage() {
               {/* Days */}
               {daysInMonth.map(date => {
                 const isSelected = isSameDay(date, currentDate);
-                const hasBooking = bookings.some(b => b.service_date && isSameDay(new Date(b.service_date), date));
+                const hasBooking = bookings.some(b => b.booking_date && isSameDay(new Date(b.booking_date), date));
                 
                 return (
                   <button 
@@ -237,10 +237,10 @@ export default function AdminCalendarPage() {
             <ul className="summary-list">
               {dailyBookings.map(b => (
                 <li key={`sum-${b.id}`} onClick={() => setSelectedBooking(b)}>
-                  <div className="sum-time">{b.service_time}</div>
+                  <div className="sum-time">{b.time_slot}</div>
                   <div className="sum-details">
                     <span className="sum-name">{b.customer_name}</span>
-                    <span className="sum-loc">{b.city}</span>
+                    <span className="sum-loc">{b.postal_code}</span>
                   </div>
                 </li>
               ))}
@@ -287,9 +287,9 @@ export default function AdminCalendarPage() {
                   const droppedHour = Math.max(5, Math.min(22, 5 + hoursToAdd));
                   const newTime = `${droppedHour.toString().padStart(2, '0')}:${minutesToAdd.toString().padStart(2, '0')}`;
                   
-                  if (draggedBooking.service_time !== newTime) {
-                    setBookings(prev => prev.map(b => b.id === draggedBooking.id ? { ...b, service_time: newTime } : b));
-                    const { error } = await supabase.from('bookings').update({ service_time: newTime }).eq('id', draggedBooking.id);
+                  if (draggedBooking.time_slot !== newTime) {
+                    setBookings(prev => prev.map(b => b.id === draggedBooking.id ? { ...b, time_slot: newTime } : b));
+                    const { error } = await supabase.from('bookings').update({ time_slot: newTime }).eq('id', draggedBooking.id);
                     if (error) console.error("Error updating time:", error);
                   }
                   setDraggedBooking(null);
@@ -300,7 +300,7 @@ export default function AdminCalendarPage() {
                     key={`bg-${hour}`} 
                     className="hour-grid-line"
                     onClick={() => {
-                      setNewBookingData({ service_date: currentDate.toISOString().split('T')[0], service_time: `${hour.toString().padStart(2, '0')}:00`, payment_method: 'multibanco' });
+                      setNewBookingData({ booking_date: currentDate.toISOString().split('T')[0], time_slot: `${hour.toString().padStart(2, '0')}:00`, payment_method: 'multibanco' });
                       setIsCreating(true);
                     }}
                     style={{ cursor: 'pointer' }}
@@ -310,8 +310,8 @@ export default function AdminCalendarPage() {
 
                 {/* Event Blocks */}
                 {dailyBookings.map((booking, idx) => {
-                  // Calculate position based on service_time (e.g. "14:00")
-                  const [bHour, bMin] = (booking.service_time || "09:00").split(':').map(Number);
+                  // Calculate position based on time_slot (e.g. "14:00")
+                  const [bHour, bMin] = (booking.time_slot || "09:00").split(':').map(Number);
                   const startHour = Math.max(5, bHour); // Clamp to 5am
                   const topPercentage = ((startHour - 5) + (bMin / 60)) * 80; // 80px per hour
                   
@@ -349,7 +349,7 @@ export default function AdminCalendarPage() {
                     >
                       <div style={{ flexShrink: 0 }}>
                         <div className="event-title">{booking.customer_name}</div>
-                        <div className="event-time" style={{ fontSize: '0.75rem', opacity: 0.8 }}>{booking.time_slot || booking.service_time} ({durationMins} min)</div>
+                        <div className="event-time" style={{ fontSize: '0.75rem', opacity: 0.8 }}>{booking.time_slot || booking.time_slot} ({durationMins} min)</div>
                       </div>
                       
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto', flexShrink: 0 }}>
@@ -390,12 +390,12 @@ export default function AdminCalendarPage() {
               <div className="detail-group">
                 <label>Cliente</label>
                 <div className="detail-val">{selectedBooking.customer_name}</div>
-                <div className="detail-subval">{selectedBooking.customer_email}</div>
+                <div className="detail-subval">{selectedBooking.email}</div>
               </div>
 
               <div className="detail-group">
                 <label>Contacto Telefónico</label>
-                <div className="detail-val">{selectedBooking.contact_phone}</div>
+                <div className="detail-val">{selectedBooking.customer_phone}</div>
               </div>
 
               <div className="detail-group">
@@ -430,8 +430,8 @@ export default function AdminCalendarPage() {
               <div className="detail-grid">
                 <div className="detail-group">
                   <label>Data & Hora</label>
-                  <div className="detail-val">{new Date(selectedBooking.service_date).toLocaleDateString('pt-PT')}</div>
-                  <div className="detail-subval">{selectedBooking.service_time}</div>
+                  <div className="detail-val">{new Date(selectedBooking.booking_date).toLocaleDateString('pt-PT')}</div>
+                  <div className="detail-subval">{selectedBooking.time_slot}</div>
                 </div>
                 <div className="detail-group">
                   <label>Imóvel & Vidros</label>
@@ -482,11 +482,11 @@ export default function AdminCalendarPage() {
               <div className="detail-grid">
                 <div className="detail-group">
                   <label>Telefone</label>
-                  <input type="text" className="form-input" style={{ width: '100%', padding: '8px' }} onChange={e => setNewBookingData({...newBookingData, contact_phone: e.target.value})} />
+                  <input type="text" className="form-input" style={{ width: '100%', padding: '8px' }} onChange={e => setNewBookingData({...newBookingData, customer_phone: e.target.value})} />
                 </div>
                 <div className="detail-group">
                   <label>Email</label>
-                  <input type="email" className="form-input" style={{ width: '100%', padding: '8px' }} onChange={e => setNewBookingData({...newBookingData, customer_email: e.target.value})} />
+                  <input type="email" className="form-input" style={{ width: '100%', padding: '8px' }} onChange={e => setNewBookingData({...newBookingData, email: e.target.value})} />
                 </div>
               </div>
               <div className="detail-grid">
@@ -517,11 +517,11 @@ export default function AdminCalendarPage() {
               <div className="detail-grid">
                 <div className="detail-group">
                   <label>Data</label>
-                  <input type="date" className="form-input" style={{ width: '100%', padding: '8px' }} value={newBookingData.service_date || ''} onChange={e => setNewBookingData({...newBookingData, service_date: e.target.value})} />
+                  <input type="date" className="form-input" style={{ width: '100%', padding: '8px' }} value={newBookingData.booking_date || ''} onChange={e => setNewBookingData({...newBookingData, booking_date: e.target.value})} />
                 </div>
                 <div className="detail-group">
                   <label>Hora</label>
-                  <input type="time" className="form-input" style={{ width: '100%', padding: '8px' }} value={newBookingData.service_time || ''} onChange={e => setNewBookingData({...newBookingData, service_time: e.target.value})} />
+                  <input type="time" className="form-input" style={{ width: '100%', padding: '8px' }} value={newBookingData.time_slot || ''} onChange={e => setNewBookingData({...newBookingData, time_slot: e.target.value})} />
                 </div>
               </div>
               <div className="detail-grid">

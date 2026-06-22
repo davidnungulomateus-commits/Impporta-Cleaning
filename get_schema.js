@@ -13,14 +13,15 @@ async function fetchColumns() {
   // Actually, PostgREST OPTIONS returns nothing in body, but headers tell us allowed methods.
   // We can query a single row as JSON to get the keys. If empty, we can force an error on a dummy column.
   
-  console.log("Checking columns by inserting a dummy row with a fake column...");
+  console.log("Checking columns by fetching a row...");
   
   const { createClient } = require('@supabase/supabase-js');
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
   
-  // Try selecting to get keys if data exists
-  const { data } = await supabase.from('bookings').select('*').limit(1);
-  if (data && data.length > 0) {
+  const { data, error } = await supabase.from('bookings').select('*').limit(1);
+  if (error) {
+    console.log("Select error:", error);
+  } else if (data && data.length > 0) {
     console.log("Columns from data:", Object.keys(data[0]));
   } else {
     console.log("No data found. Checking Supabase SQL query if possible.");
