@@ -51,7 +51,7 @@ export default function Home() {
     // Create booking in Supabase
     const { error } = await supabase.from('bookings').insert([{
       customer_name: formData.name,
-      contact_email: formData.email,
+      customer_email: formData.email,
       contact_phone: formData.phone,
       service_date: localDateStr,
       service_time: selectedTimeSlot,
