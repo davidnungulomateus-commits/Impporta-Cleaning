@@ -523,7 +523,6 @@ export default function AdminCalendarPage() {
                 </button>
               )}
             </div>
-            </div>
           </div>
         </div>
       )}

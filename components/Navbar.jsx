@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 
 export default function Navbar() {
   const [user, setUser] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     // Check active session
@@ -27,6 +28,10 @@ export default function Navbar() {
     window.location.href = '/';
   };
 
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
   const renderAuthSection = () => {
     if (user) {
       const avatarUrl = user.user_metadata?.avatar_url;
@@ -39,34 +44,46 @@ export default function Navbar() {
             {avatarUrl ? <img src={avatarUrl} alt="Avatar" /> : initials}
           </button>
           <div className="user-dropdown-content">
-            <Link href="/dashboard">O meu Painel</Link>
-            {isAdmin && <Link href="/admin" style={{ color: 'var(--accent-color)' }}>Painel Admin</Link>}
-            <a href="#" onClick={handleLogout}>Sair</a>
+            <Link href="/dashboard" onClick={closeMobileMenu}>O meu Painel</Link>
+            {isAdmin && <Link href="/admin" onClick={closeMobileMenu} style={{ color: 'var(--accent-color)' }}>Painel Admin</Link>}
+            <a href="#" onClick={(e) => { closeMobileMenu(); handleLogout(e); }}>Sair</a>
           </div>
         </div>
       );
     }
 
     return (
-      <Link href="/auth" className="btn btn-outline">Entrar</Link>
+      <Link href="/auth" className="btn btn-outline" onClick={closeMobileMenu}>Entrar</Link>
     );
   };
 
   return (
     <nav className="navbar">
-      <div className="container">
-        <Link href="/" className="nav-brand">
+      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', flexWrap: 'wrap' }}>
+        <Link href="/" className="nav-brand" onClick={closeMobileMenu}>
           <img src="/logo.svg" alt="Impporta Logo" />
         </Link>
-        <ul className="nav-menu">
-          <li><Link href="/#services" className="nav-link">O Que Fazemos</Link></li>
-          <li><Link href="/#process" className="nav-link">Como Funciona</Link></li>
-          <li><Link href="/#calculator" className="nav-link">Simulador</Link></li>
-          <li><Link href="/#calendar" className="nav-link">Agendamento</Link></li>
-          <li><Link href="/about" className="nav-link">Quem Somos</Link></li>
-        </ul>
-        <div className="nav-actions">
-          {renderAuthSection()}
+        
+        {/* Hamburger Icon */}
+        <button 
+          className="hamburger-btn" 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Menu"
+        >
+          {isMobileMenuOpen ? '✕' : '☰'}
+        </button>
+
+        <div className={`nav-links-container ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+          <ul className="nav-menu">
+            <li><Link href="/#services" className="nav-link" onClick={closeMobileMenu}>O Que Fazemos</Link></li>
+            <li><Link href="/#process" className="nav-link" onClick={closeMobileMenu}>Como Funciona</Link></li>
+            <li><Link href="/#calculator" className="nav-link" onClick={closeMobileMenu}>Simulador</Link></li>
+            <li><Link href="/#calendar" className="nav-link" onClick={closeMobileMenu}>Agendamento</Link></li>
+            <li><Link href="/about" className="nav-link" onClick={closeMobileMenu}>Quem Somos</Link></li>
+          </ul>
+          <div className="nav-actions">
+            {renderAuthSection()}
+          </div>
         </div>
       </div>
     </nav>
