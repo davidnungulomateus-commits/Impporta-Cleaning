@@ -8,12 +8,12 @@ export default function Home() {
   const [windowCount, setWindowCount] = useState(4);
   const [totalPrice, setTotalPrice] = useState(16);
   
-  // Calendar State
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
   const [currentMonthDate, setCurrentMonthDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [paymentMethod, setPaymentMethod] = useState('online');
 
   useEffect(() => {
     setMounted(true);
@@ -362,22 +362,22 @@ export default function Home() {
                     <div className="payment-methods" style={{ marginTop: '24px' }}>
                       <h3>Método de Pagamento</h3>
                       <div className="payment-method-options" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
-                        <label className="pm-option active">
-                          <input type="radio" name="payment-method" value="online" defaultChecked />
+                        <label className={`pm-option ${paymentMethod === 'online' ? 'active' : ''}`}>
+                          <input type="radio" name="payment-method" value="online" checked={paymentMethod === 'online'} onChange={(e) => setPaymentMethod(e.target.value)} />
                           <div className="pm-info">
                             <span className="pm-title">💳 Cartão de Crédito / Débito (Online)</span>
                             <p>Pague online de forma 100% segura.</p>
                           </div>
                         </label>
-                        <label className="pm-option">
-                          <input type="radio" name="payment-method" value="mbway" />
+                        <label className={`pm-option ${paymentMethod === 'mbway' ? 'active' : ''}`}>
+                          <input type="radio" name="payment-method" value="mbway" checked={paymentMethod === 'mbway'} onChange={(e) => setPaymentMethod(e.target.value)} />
                           <div className="pm-info">
                             <span className="pm-title">📱 MB Way</span>
                             <p>Receba a notificação de pagamento diretamente no telemóvel.</p>
                           </div>
                         </label>
-                        <label className="pm-option">
-                          <input type="radio" name="payment-method" value="cash" />
+                        <label className={`pm-option ${paymentMethod === 'cash' ? 'active' : ''}`}>
+                          <input type="radio" name="payment-method" value="cash" checked={paymentMethod === 'cash'} onChange={(e) => setPaymentMethod(e.target.value)} />
                           <div className="pm-info">
                             <span className="pm-title">💵 Pagamento em mãos (Dinheiro / Cartão)</span>
                             <p>Efetue o pagamento diretamente ao profissional no dia da limpeza.</p>
@@ -385,22 +385,33 @@ export default function Home() {
                         </label>
                       </div>
 
-                      <div className="card-details-fields" style={{ marginTop: '20px' }}>
-                        <div className="form-group">
-                          <label htmlFor="card-num">Número do Cartão</label>
-                          <input type="text" id="card-num" placeholder="0000 0000 0000 0000" className="form-input-field" />
-                        </div>
-                        <div className="form-row" style={{ marginTop: '12px' }}>
+                      {paymentMethod === 'online' && (
+                        <div className="card-details-fields" style={{ marginTop: '20px' }}>
                           <div className="form-group">
-                            <label htmlFor="card-expiry">Validade</label>
-                            <input type="text" id="card-expiry" placeholder="MM/AA" className="form-input-field" />
+                            <label htmlFor="card-num">Número do Cartão</label>
+                            <input type="text" id="card-num" placeholder="0000 0000 0000 0000" className="form-input-field" />
                           </div>
-                          <div className="form-group">
-                            <label htmlFor="card-cvc">CVC</label>
-                            <input type="text" id="card-cvc" placeholder="000" className="form-input-field" />
+                          <div className="form-row" style={{ marginTop: '12px' }}>
+                            <div className="form-group">
+                              <label htmlFor="card-expiry">Validade</label>
+                              <input type="text" id="card-expiry" placeholder="MM/AA" className="form-input-field" />
+                            </div>
+                            <div className="form-group">
+                              <label htmlFor="card-cvc">CVC</label>
+                              <input type="text" id="card-cvc" placeholder="000" className="form-input-field" />
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      )}
+
+                      {paymentMethod === 'mbway' && (
+                        <div className="mbway-details-fields" style={{ marginTop: '20px' }}>
+                          <div className="form-group">
+                            <label htmlFor="mbway-phone">Número de Telemóvel MBWay</label>
+                            <input type="tel" id="mbway-phone" placeholder="910 000 000" className="form-input-field" />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
