@@ -99,39 +99,25 @@ export default function Home() {
       </section>
 
       {/* Antes e Depois */}
-      <section id="results" className="section-padding bg-alt" style={{ display: 'none' }}>
+      {/* Antes e Depois */}
+      <section id="results" className="section-padding bg-alt">
         <div className="container">
           <div className="section-header fade-up visible">
             <span style={{ textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--primary)', fontWeight: '600', marginBottom: '8px', display: 'block' }}>Resultados</span>
             <h2>Antes e Depois</h2>
-            <p>Veja com os seus próprios olhos a diferença que uma limpeza profissional pode fazer. A transparência perfeita transforma o seu espaço.</p>
+            <p>Veja com os seus próprios olhos a diferença que uma limpeza profissional Impporta faz. A transparência perfeita transforma o seu espaço.</p>
           </div>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginTop: '40px' }}>
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="fade-up visible" style={{ background: 'var(--surface)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ display: 'flex', height: '200px' }}>
-                  <div style={{ flex: 1, backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '2px solid white' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#999' }}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                      <span style={{ fontSize: '0.8rem', marginTop: '8px', fontWeight: 'bold' }}>Foto em breve</span>
-                    </div>
-                  </div>
-                  <div style={{ flex: 1, backgroundColor: '#e5e5e5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#999' }}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                      <span style={{ fontSize: '0.8rem', marginTop: '8px', fontWeight: 'bold' }}>Foto em breve</span>
-                    </div>
-                  </div>
-                </div>
-                <div style={{ padding: '16px', textAlign: 'center', borderTop: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 10%', fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-muted)' }}>
-                    <span>Antes</span>
-                    <span>Depois</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+            <div className="fade-up visible" style={{ background: 'var(--surface)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+              <img src="/images/before-after-1.jpg" alt="Antes e depois de montra" style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
+            </div>
+            <div className="fade-up visible" style={{ background: 'var(--surface)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', transitionDelay: '0.1s' }}>
+              <img src="/images/before-after-2.jpg" alt="Antes e depois apartamento vista mar" style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
+            </div>
+            <div className="fade-up visible" style={{ background: 'var(--surface)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', transitionDelay: '0.2s' }}>
+              <img src="/images/before-after-3.jpg" alt="Antes e depois marquise" style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
+            </div>
           </div>
         </div>
       </section>
