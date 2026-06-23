@@ -123,6 +123,23 @@ export default function BookingWidget() {
     };
     restoreState();
 
+    // Listen to hash changes for pricing card clicks
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#calculator-')) {
+        const serviceId = hash.replace('#calculator-', '');
+        if (SERVICES[serviceId]) {
+          setSelectedService(serviceId);
+          setTimeout(() => {
+            document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' });
+          }, 100);
+        }
+      }
+    };
+
+    handleHashChange(); // Run on mount in case they loaded with a hash
+    window.addEventListener('hashchange', handleHashChange);
+
     const fetchSessionForAutofill = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session && session.user) {

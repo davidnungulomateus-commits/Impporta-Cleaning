@@ -43,7 +43,7 @@ export default function Home() {
               <span className="pricing-badge">1ª Visita</span>
               <div className="pricing-first-price">€36</div>
               <p className="pricing-regular-price">Depois: €45 / visita</p>
-              <a href="#calculator" className="btn btn-primary">Agendar agora</a>
+              <a href="#calculator-t1" className="btn btn-primary">Agendar agora</a>
             </div>
 
             <div className="pricing-card fade-up visible" style={{ transitionDelay: '0.1s' }}>
@@ -55,7 +55,7 @@ export default function Home() {
               <span className="pricing-badge">1ª Visita</span>
               <div className="pricing-first-price">€48</div>
               <p className="pricing-regular-price">Depois: €60 / visita</p>
-              <a href="#calculator" className="btn btn-primary">Agendar agora</a>
+              <a href="#calculator-t2" className="btn btn-primary">Agendar agora</a>
             </div>
 
             <div className="pricing-card fade-up visible" style={{ transitionDelay: '0.2s' }}>
@@ -67,7 +67,7 @@ export default function Home() {
               <span className="pricing-badge">1ª Visita</span>
               <div className="pricing-first-price">€68</div>
               <p className="pricing-regular-price">Depois: €85 / visita</p>
-              <a href="#calculator" className="btn btn-primary">Agendar agora</a>
+              <a href="#calculator-t3" className="btn btn-primary">Agendar agora</a>
             </div>
 
             <div className="pricing-card pricing-card--commercial fade-up visible" style={{ transitionDelay: '0.3s' }}>
@@ -79,7 +79,7 @@ export default function Home() {
               <span className="pricing-badge">1ª Visita</span>
               <div className="pricing-first-price">a partir de €16</div>
               <p className="pricing-regular-price">Depois: a partir de €20 / visita</p>
-              <a href="#calculator" className="btn btn-primary">Agendar agora</a>
+              <a href="#calculator-montra" className="btn btn-primary">Agendar agora</a>
             </div>
           </div>
 
