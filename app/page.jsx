@@ -2,8 +2,16 @@ import HeroInteractive from '../components/HeroInteractive';
 import BookingWidget from '../components/BookingWidget';
 
 export const metadata = {
-  title: 'Impporta - Limpeza de Vidros Lisboa',
-  description: 'Limpeza profissional e personalizada de vidros e janelas em Lisboa. Serviços para residências, escritórios e condomínios. Agende já a sua limpeza com a Impporta.',
+  title: 'Impporta — Limpeza Profissional de Vidros em Lisboa',
+  description: 'Limpeza especializada de janelas e vidros em Lisboa, Sintra, Cascais e Oeiras. Primeira visita com 20% de desconto.',
+  openGraph: {
+    title: 'Impporta — Limpeza de Vidros em Lisboa',
+    description: 'Especialistas em limpeza de janelas. T1 a partir de €36. Agendamento online.',
+    url: 'https://www.impporta.com',
+    siteName: 'Impporta',
+    locale: 'pt_PT',
+    type: 'website',
+  },
 };
 
 export default function Home() {
