@@ -20,6 +20,17 @@ export default function DashboardPage() {
       
       setUser(session.user);
 
+      // Link any existing guest bookings matching this user's email to their account
+      try {
+        await fetch('/api/link-bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: session.user.id, email: session.user.email })
+        });
+      } catch (err) {
+        console.error("Error linking guest bookings:", err);
+      }
+
       // Fetch bookings
       const { data, error } = await supabase
         .from('bookings')
