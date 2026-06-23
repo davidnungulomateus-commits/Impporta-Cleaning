@@ -64,9 +64,8 @@ export default function Navbar() {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <button 
-          className="btn" 
+          className="btn btn-outline" 
           onClick={() => { closeMobileMenu(); handleGoogleLogin(); }}
-          style={{ padding: '8px 16px', backgroundColor: 'transparent', border: 'none', color: 'var(--text-color)', fontWeight: '600', cursor: 'pointer' }}
         >
           Entrar
         </button>
