@@ -62,13 +62,22 @@ export default function Navbar() {
     }
 
     return (
-      <Link 
-        href="/#calculator"
-        className="btn btn-outline" 
-        onClick={closeMobileMenu}
-      >
-        Agendar
-      </Link>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <button 
+          className="btn" 
+          onClick={() => { closeMobileMenu(); handleGoogleLogin(); }}
+          style={{ padding: '8px 16px', backgroundColor: 'transparent', border: 'none', color: 'var(--text-color)', fontWeight: '600', cursor: 'pointer' }}
+        >
+          Entrar
+        </button>
+        <Link 
+          href="/#calculator"
+          className="btn btn-primary" 
+          onClick={closeMobileMenu}
+        >
+          Agendar
+        </Link>
+      </div>
     );
   };
 

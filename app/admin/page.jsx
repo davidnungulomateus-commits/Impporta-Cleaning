@@ -496,7 +496,7 @@ export default function AdminCalendarPage() {
                 <div style={{ padding: '16px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Serviço</div>
-                    <div style={{ fontSize: '1.1rem', color: '#1e293b', fontWeight: '600' }}>{selectedBooking.window_count} Janelas</div>
+                    <div style={{ fontSize: '1.1rem', color: '#1e293b', fontWeight: '600' }}>{selectedBooking.service_name || (selectedBooking.property_type ? selectedBooking.property_type.charAt(0).toUpperCase() + selectedBooking.property_type.slice(1) : 'Personalizado')}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Preço Final</div>

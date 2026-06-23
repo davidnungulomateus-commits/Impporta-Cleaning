@@ -103,8 +103,8 @@ export default function DashboardPage() {
                         <div style={{ fontWeight: '600' }}>{formatDate(booking.service_date)} às {booking.service_time}</div>
                       </div>
                       <div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Imóvel</div>
-                        <div>{booking.property_type?.charAt(0).toUpperCase() + booking.property_type?.slice(1)} ({booking.room_count} ass., ~{booking.window_count} janelas)</div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Serviço</div>
+                        <div>{booking.service_name || (booking.property_type ? booking.property_type.charAt(0).toUpperCase() + booking.property_type.slice(1) + ` (${booking.window_count} janelas)` : 'Serviço Personalizado')}</div>
                       </div>
                       <div>
                         <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Morada</div>
