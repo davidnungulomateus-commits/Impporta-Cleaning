@@ -72,6 +72,12 @@ export default function BookingWidget() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [clientSecret, setClientSecret] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const showError = (msg) => {
+    setErrorMessage(msg);
+    setTimeout(() => setErrorMessage(''), 6000);
+  };
 
   // Derive price from selected service
   const service = SERVICES[selectedService];
@@ -199,7 +205,7 @@ export default function BookingWidget() {
 
   const handleFinalizeBooking = async (e, overrideStatus = null) => {
     if (!selectedDate || !selectedTimeSlot) {
-      alert("Por favor, selecione uma data e horário no Passo 1.");
+      showError("Por favor, selecione uma data e horário no Passo 1.");
       setStep(1);
       return;
     }
@@ -231,7 +237,7 @@ export default function BookingWidget() {
 
     if (error) {
       console.error('Error creating booking:', error);
-      alert('Houve um erro ao agendar. Por favor, tente novamente.');
+      showError(error.message || 'Houve um erro ao agendar. Verifique os dados e tente novamente.');
       return;
     }
 
@@ -249,7 +255,7 @@ export default function BookingWidget() {
 
   const handleContinueToStep2 = () => {
     if (!selectedDate || !selectedTimeSlot) {
-      alert("Por favor, selecione um horário disponível antes de continuar.");
+      showError("Por favor, selecione um horário disponível antes de continuar.");
       return;
     }
     setStep(2);
@@ -285,6 +291,13 @@ export default function BookingWidget() {
 
   return (
     <>
+      {errorMessage && (
+        <div style={{ position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#EF4444', color: 'white', padding: '16px 24px', borderRadius: '8px', zIndex: 9999, boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '12px', animation: 'fadeUp 0.3s ease-out' }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {errorMessage}
+        </div>
+      )}
+      
       {/* Simulator Section */}
       <section id="calculator" className="calculator-section fade-up visible">
         <div className="container">
