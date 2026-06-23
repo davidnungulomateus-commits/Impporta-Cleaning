@@ -2498,3 +2498,305 @@ footer {
     transform: translateX(-50%);
   }
 }
+
+/* ========================================
+   PRICING SECTION
+   ======================================== */
+
+.pricing-section {
+  padding: 80px 0;
+}
+
+.discount-banner {
+  background: linear-gradient(135deg, rgba(0, 112, 243, 0.06), rgba(0, 229, 255, 0.06));
+  border: 1px solid rgba(0, 112, 243, 0.12);
+  border-radius: 16px;
+  padding: 20px 28px;
+  margin-bottom: 48px;
+  text-align: center;
+}
+
+.discount-banner-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.discount-banner-sub {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.pricing-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.pricing-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.pricing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+
+.pricing-card--commercial {
+  border-color: rgba(0, 180, 160, 0.25);
+}
+
+.pricing-card--commercial:hover {
+  box-shadow: 0 12px 32px rgba(0, 180, 160, 0.12);
+}
+
+.pricing-card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  background: rgba(0, 112, 243, 0.08);
+  color: var(--primary);
+}
+
+.pricing-card--commercial .pricing-card-icon {
+  background: rgba(0, 180, 160, 0.1);
+  color: #00b4a0;
+}
+
+.pricing-card-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.pricing-card-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.pricing-badge {
+  display: inline-block;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 6px;
+}
+
+.pricing-card--commercial .pricing-badge {
+  background: #00b4a0;
+}
+
+.pricing-first-price {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.pricing-regular-price {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  opacity: 0.7;
+  margin-bottom: 24px;
+}
+
+.pricing-card .btn {
+  width: 100%;
+  text-align: center;
+  margin-top: auto;
+}
+
+.pricing-trust-line {
+  text-align: center;
+  margin-top: 40px;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.pricing-trust-line a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pricing-trust-line a:hover {
+  text-decoration: underline;
+}
+
+/* ========================================
+   SIMULATOR — SERVICE SELECTOR
+   ======================================== */
+
+.service-selector {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.service-selector-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 16px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.service-selector-btn:hover {
+  border-color: var(--primary);
+  background: rgba(0, 112, 243, 0.03);
+}
+
+.service-selector-btn.active {
+  border-color: var(--primary);
+  background: rgba(0, 112, 243, 0.06);
+  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.12);
+}
+
+.service-selector-btn .selector-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 112, 243, 0.08);
+  color: var(--primary);
+}
+
+.service-selector-btn.active .selector-icon {
+  background: var(--primary);
+  color: #fff;
+}
+
+.service-selector-btn .selector-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.simulator-result {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+}
+
+.simulator-result-price {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1;
+  margin: 8px 0;
+}
+
+.simulator-result-regular {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.simulator-result-description {
+  font-size: 0.95rem;
+  color: var(--text-main);
+  line-height: 1.5;
+  margin: 16px 0 24px;
+}
+
+.simulator-result-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  line-height: 1.5;
+}
+
+.simulator-result-note a {
+  color: #25D366;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.simulator-result-note a:hover {
+  text-decoration: underline;
+}
+
+/* ========================================
+   PRICING — MOBILE RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+  .pricing-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .pricing-card {
+    padding: 28px 24px;
+  }
+
+  .pricing-card .btn {
+    padding: 14px 24px;
+    font-size: 1rem;
+  }
+
+  .service-selector {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .service-selector-btn {
+    flex-direction: row;
+    padding: 16px;
+    gap: 12px;
+    text-align: left;
+  }
+
+  .simulator-result-price {
+    font-size: 2.4rem;
+  }
+
+  .discount-banner {
+    padding: 16px 20px;
+  }
+}

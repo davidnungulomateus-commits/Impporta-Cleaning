@@ -9,12 +9,46 @@ import CheckoutForm from './CheckoutForm';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
+// Pricing constants — single source of truth
+const SERVICES = {
+  t1: {
+    name: 'Apartamento T1',
+    subtitle: 'Interior + exterior, até 8 janelas',
+    firstVisitPrice: 36,
+    regularPrice: 45,
+    durationMinutes: 60,
+  },
+  t2: {
+    name: 'Apartamento T2',
+    subtitle: 'Interior + exterior, até 12 janelas',
+    firstVisitPrice: 48,
+    regularPrice: 60,
+    durationMinutes: 75,
+  },
+  t3: {
+    name: 'Apartamento T3 / Moradia',
+    subtitle: 'Interior + exterior, superfície maior',
+    firstVisitPrice: 68,
+    regularPrice: 85,
+    durationMinutes: 105,
+  },
+  montra: {
+    name: 'Montra / Vidros de Loja',
+    subtitle: 'Contrato semanal recorrente, por visita',
+    firstVisitPrice: 16,
+    regularPrice: 20,
+    durationMinutes: 30,
+    isRange: true,
+    firstVisitPriceMax: 24,
+    regularPriceMax: 30,
+  },
+};
+
 export default function BookingWidget() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState(1);
-  const [windowCount, setWindowCount] = useState(4);
-  const [totalPrice, setTotalPrice] = useState(16);
+  const [selectedService, setSelectedService] = useState('t2');
   
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -25,6 +59,7 @@ export default function BookingWidget() {
   const [existingBookings, setExistingBookings] = useState([]);
   const [user, setUser] = useState(null);
   const [showAuthBlock, setShowAuthBlock] = useState(false);
+  const [isFirstVisit, setIsFirstVisit] = useState(true);
 
   // Customer Form Data
   const [formData, setFormData] = useState({
@@ -37,6 +72,10 @@ export default function BookingWidget() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [clientSecret, setClientSecret] = useState('');
+
+  // Derive price from selected service
+  const service = SERVICES[selectedService];
+  const totalPrice = isFirstVisit ? service.firstVisitPrice : service.regularPrice;
 
   useEffect(() => {
     if (step === 3 && (paymentMethod === 'online' || paymentMethod === 'mbway') && totalPrice > 0) {
@@ -67,8 +106,7 @@ export default function BookingWidget() {
       if (savedState) {
         try {
           const parsed = JSON.parse(savedState);
-          if (parsed.windowCount) setWindowCount(parsed.windowCount);
-          if (parsed.totalPrice) setTotalPrice(parsed.totalPrice);
+          if (parsed.selectedService) setSelectedService(parsed.selectedService);
           if (parsed.selectedTimeSlot) setSelectedTimeSlot(parsed.selectedTimeSlot);
           if (parsed.selectedDate) setSelectedDate(new Date(parsed.selectedDate));
           if (parsed.step) setStep(parsed.step);
@@ -95,6 +133,15 @@ export default function BookingWidget() {
           email: session.user.email || prev.email,
           phone: session.user.user_metadata?.phone || session.user.phone || prev.phone
         }));
+
+        // Check if first visit
+        try {
+          const res = await fetch(`/api/check-first-visit?user_id=${session.user.id}`);
+          const data = await res.json();
+          setIsFirstVisit(data.isFirstVisit);
+        } catch {
+          setIsFirstVisit(true); // Default to first visit if check fails
+        }
       }
     };
     fetchSessionForAutofill();
@@ -153,12 +200,14 @@ export default function BookingWidget() {
       service_date: localDateStr,
       service_time: selectedTimeSlot,
       total_price: totalPrice,
-      window_count: windowCount,
+      service_type: selectedService,
+      service_name: service.name,
       address: `${formData.street}${formData.suite ? ', ' + formData.suite : ''}`,
       city: formData.postal,
       postal_code: formData.postal,
       payment_method: paymentMethod,
-      status: overrideStatus || 'pending'
+      status: overrideStatus || 'pending',
+      user_id: user?.id || null
     }]);
 
     setIsSubmitting(false);
@@ -173,18 +222,12 @@ export default function BookingWidget() {
       name: formData.name,
       date: localDateStr,
       time: selectedTimeSlot,
-      windows: windowCount.toString(),
+      service: service.name,
       price: totalPrice.toString(),
       address: `${formData.street}${formData.suite ? ', ' + formData.suite : ''}`
     }).toString();
 
     router.push(`/success?${queryParams}`);
-  };
-
-  const handleWindowChange = (e) => {
-    const val = parseInt(e.target.value) || 1;
-    setWindowCount(val);
-    setTotalPrice(val * 4);
   };
 
   const handleContinueToStep2 = () => {
@@ -202,8 +245,7 @@ export default function BookingWidget() {
   const handleGoogleLogin = async () => {
     // Save state before redirecting
     sessionStorage.setItem('impporta_booking_state', JSON.stringify({
-      windowCount,
-      totalPrice,
+      selectedService,
       selectedTimeSlot,
       selectedDate: selectedDate?.getTime(),
       step: 2
@@ -217,77 +259,72 @@ export default function BookingWidget() {
     });
   };
 
+  // Window icon SVG for the selector buttons
+  const WindowIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+  );
+
+  const StoreIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+  );
+
   if (!mounted) return null;
 
   return (
     <>
-      {/* Calculator Section */}
+      {/* Simulator Section */}
       <section id="calculator" className="calculator-section fade-up visible">
         <div className="container">
           <div className="section-header">
             <h2>Simulador de Preço</h2>
-            <p>Insira a quantidade de janelas/vidros e veja em tempo real quanto economiza ao escolher o nosso serviço especializado!</p>
+            <p>Escolha o tipo de imóvel e veja instantaneamente o preço da sua limpeza de vidros.</p>
           </div>
 
           <div className="calculator-box">
-            <div className="calculator-inputs">
-              <div className="input-group">
-                <label htmlFor="window-range" className="input-label-highlight" style={{ fontSize: '1.35rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-                  👉 Insira aqui o número de janelas a limpar: 
-                  <span className="highlight-val" style={{ fontSize: '1.5rem', padding: '6px 18px' }}>{windowCount}</span>
-                </label>
-                <div className="slider-wrapper" style={{ marginTop: '16px' }}>
-                  <input type="range" min="1" max="100" value={windowCount} onChange={handleWindowChange} className="window-slider" />
-                  <input type="number" min="1" max="100" value={windowCount} onChange={handleWindowChange} className="window-number-input" />
-                </div>
-                
-                <div className="window-counting-info" style={{ marginTop: '20px', backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '16px', fontSize: '0.9rem', textAlign: 'left', boxShadow: 'var(--shadow-sm)' }}>
-                  <strong style={{ color: 'var(--text-main)', display: 'flex', marginBottom: '10px', fontSize: '0.95rem', alignItems: 'center', gap: '6px' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary)' }}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                    Como contamos as janelas?
-                  </strong>
-                  <p style={{ color: 'var(--text-muted)', lineHeight: '1.5', margin: '0 0 10px 0' }}>
-                    Cobramos por <strong>janela/estrutura completa</strong> e não por painéis ou divisórias internas. Veja como deve contar:
-                  </p>
-                  <ul style={{ color: 'var(--text-muted)', margin: '0', paddingLeft: '20px', lineHeight: '1.6' }}>
-                    <li style={{ marginBottom: '8px' }}><strong>Moldura única com divisões:</strong> Se a sua janela ou porta possui vários vidros separados por divisórias (de metal ou madeira), mas está toda contida em <strong>uma única moldura principal</strong>, conta como apenas <strong>1 janela</strong>.</li>
-                    <li style={{ marginBottom: '8px' }}><strong>Janelas de duas partes (guilhotina ou correr):</strong> Se possui uma janela dividida em duas partes estruturais independentes (ex: uma parte móvel que abre/desliza e uma parte fixa, ou uma parte superior e outra inferior), cada parte conta como <strong>1 janela</strong> (total de 2).</li>
-                    <li style={{ marginBottom: '0' }}><strong>Montras ou Paredes de Vidro:</strong> Em fachadas comerciais ou paredes cobertas de vidro, cada painel individual delimitado pela sua própria estrutura/caixilho conta como <strong>1 janela</strong>.</li>
-                  </ul>
-                </div>
-              </div>
+            <div className="service-selector">
+              {Object.entries(SERVICES).map(([key, svc]) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`service-selector-btn ${selectedService === key ? 'active' : ''}`}
+                  onClick={() => setSelectedService(key)}
+                >
+                  <div className="selector-icon">
+                    {key === 'montra' ? <StoreIcon /> : <WindowIcon />}
+                  </div>
+                  <div>
+                    <div>{svc.name}</div>
+                    <div className="selector-label">{svc.subtitle}</div>
+                  </div>
+                </button>
+              ))}
             </div>
 
-            <div className="chart-wrapper-vertical">
-              <div className="chart-column competitor">
-                <div className="column-track">
-                  <div className="column-fill" style={{ height: '70%' }}><span>€{windowCount * 10}</span></div>
-                </div>
-                <div className="column-label">Média Concorrência<br />(€10/janela)</div>
+            <div className="simulator-result">
+              <span className="pricing-badge">1ª Visita</span>
+              <div className="simulator-result-price">
+                {service.isRange ? `€${service.firstVisitPrice}–${service.firstVisitPriceMax}` : `€${service.firstVisitPrice}`}
               </div>
+              <p className="simulator-result-regular">
+                {service.isRange
+                  ? `Depois: €${service.regularPrice}–${service.regularPriceMax} / visita`
+                  : `Depois: €${service.regularPrice} / visita`
+                }
+              </p>
+              <p className="simulator-result-description">
+                {service.isRange
+                  ? `Para uma ${service.name.toLowerCase()}, a primeira visita custa a partir de €${service.firstVisitPrice}. As visitas seguintes custam a partir de €${service.regularPrice}.`
+                  : `Para um ${service.name}, a primeira visita custa €${service.firstVisitPrice}. As visitas seguintes custam €${service.regularPrice}.`
+                }
+              </p>
+              <a href="#calendar" className="btn btn-primary">Agendar agora</a>
 
-              <div className="chart-column regular">
-                <div className="column-track">
-                  <div className="column-fill" style={{ height: '50%' }}><span>€{windowCount * 7}</span></div>
-                </div>
-                <div className="column-label">Preço Regular<br />(€7/janela)</div>
-              </div>
-
-              <div className="chart-column discount">
-                <div className="column-track">
-                  <div className="column-fill" style={{ height: '30%' }}><span>€{totalPrice}</span></div>
-                </div>
-                <div className="column-label">O Seu Preço (Oferta!)<br />(€4/janela)</div>
-              </div>
-            </div>
-
-            <div className="savings-callout">
-              <h3>Total a Pagar: <span className="text-secondary">€{totalPrice}</span></h3>
-              <p>Você economiza <strong style={{ color: 'var(--secondary)' }}>€{windowCount * 6}</strong> em relação à concorrência ao aproveitar a oferta da primeira limpeza!</p>
-            </div>
-            
-            <div style={{ textAlign: 'center', marginTop: '32px' }}>
-              <a href="#calendar" className="btn btn-primary">Avançar para Agendamento</a>
+              {(selectedService === 't3' || selectedService === 'montra') && (
+                <p className="simulator-result-note">
+                  Para propriedades maiores ou condomínios, podemos preparar um orçamento personalizado gratuito.{' '}
+                  <a href="https://wa.me/351927322095" target="_blank" rel="noopener noreferrer">💬 Contactar via WhatsApp</a>
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -350,7 +387,7 @@ export default function BookingWidget() {
                           const min = i % 2 === 0 ? '00' : '30';
                           return `${hour.toString().padStart(2, '0')}:${min}`;
                         }).map(time => {
-                          const newDuration = 30 + windowCount * 2;
+                          const newDuration = service.durationMinutes;
                           const newStart = timeToMinutes(time);
                           const newEnd = newStart + newDuration;
                           
@@ -358,8 +395,6 @@ export default function BookingWidget() {
                             const bStart = timeToMinutes(b.service_time);
                             const bDuration = 30 + (b.window_count || 4) * 2;
                             const bEnd = bStart + bDuration;
-                            
-                            // Check overlap condition
                             return (newStart < bEnd) && (newEnd > bStart);
                           });
 
@@ -383,10 +418,6 @@ export default function BookingWidget() {
                             </button>
                           );
                         })}
-                      </div>
-                      <div className="slot-summary-box" style={{ display: 'none' }}>
-                        <p>Duração estimada: <strong>8 minutos</strong></p>
-                        <p>Horário: <strong>14:00 às 14:08</strong></p>
                       </div>
                     </div>
                   </div>
@@ -460,10 +491,9 @@ export default function BookingWidget() {
                   <div className="payment-widget" style={{ marginTop: '24px' }}>
                     <div className="booking-summary-preview">
                       <h3>Resumo do Serviço</h3>
-                      <p>Serviço: <strong>Limpeza de Vidros Impporta</strong></p>
-                      <p>Janelas: <strong>{windowCount} janelas</strong></p>
+                      <p>Serviço: <strong>{service.name}</strong></p>
                       <p>Data/Hora: <strong>{selectedDate ? selectedDate.toLocaleDateString('pt-PT') : ''} às {selectedTimeSlot || '?'}</strong></p>
-                      <p>Duração estimada: <strong>{30 + windowCount * 2} min</strong></p>
+                      <p>Duração estimada: <strong>{service.durationMinutes} min</strong></p>
                       <p className="total-preview-cost">Total: <strong>€{totalPrice}</strong></p>
                     </div>
 

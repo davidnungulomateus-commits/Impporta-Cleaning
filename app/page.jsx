@@ -19,36 +19,73 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Services */}
-      <section id="services" className="services">
+      {/* Pricing */}
+      <section id="services" className="pricing-section">
         <div className="container">
           <div className="section-header fade-up visible">
-            <h2>O Que Fazemos</h2>
-            <p>Somos especializados exclusivamente em limpeza de vidros e janelas. Garantimos máxima transparência, brilho e segurança para diferentes tipos de ambientes.</p>
+            <h2>Preços Transparentes</h2>
+            <p>Sem surpresas. Sem letras pequenas.</p>
+            <p style={{ color: 'var(--primary)', fontWeight: '600', marginTop: '8px' }}>Primeira visita sempre com 20% de desconto.</p>
           </div>
-          
-          <div className="services-grid">
-            <div className="service-card fade-up visible">
-              <div className="service-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+
+          <div className="discount-banner fade-up visible">
+            <p className="discount-banner-title">🎉 Primeira visita com 20% de desconto — para novos clientes em todos os serviços.</p>
+            <p className="discount-banner-sub">Sem código, sem formulários. O desconto é aplicado automaticamente.</p>
+          </div>
+
+          <div className="pricing-cards-grid">
+            <div className="pricing-card fade-up visible">
+              <div className="pricing-card-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
               </div>
-              <h3>Limpeza de Vidros Residencial</h3>
-              <p>Deixamos as janelas e sacadas da sua casa ou apartamento perfeitamente limpas e sem marcas, trazendo mais luz e harmonia para o seu lar.</p>
+              <h3 className="pricing-card-name">Apartamento T1</h3>
+              <p className="pricing-card-subtitle">Interior + exterior, até 8 janelas</p>
+              <span className="pricing-badge">1ª Visita</span>
+              <div className="pricing-first-price">€36</div>
+              <p className="pricing-regular-price">Depois: €45 / visita</p>
+              <a href="#calculator" className="btn btn-primary">Agendar agora</a>
             </div>
-            <div className="service-card fade-up visible" style={{ transitionDelay: '0.1s' }}>
-              <div className="service-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+
+            <div className="pricing-card fade-up visible" style={{ transitionDelay: '0.1s' }}>
+              <div className="pricing-card-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
               </div>
-              <h3>Limpeza de Vidros para Escritórios</h3>
-              <p>Mantenha a fachada e as divisórias de vidro da sua empresa impecáveis, garantindo uma imagem profissional e um ambiente de trabalho produtivo.</p>
+              <h3 className="pricing-card-name">Apartamento T2</h3>
+              <p className="pricing-card-subtitle">Interior + exterior, até 12 janelas</p>
+              <span className="pricing-badge">1ª Visita</span>
+              <div className="pricing-first-price">€48</div>
+              <p className="pricing-regular-price">Depois: €60 / visita</p>
+              <a href="#calculator" className="btn btn-primary">Agendar agora</a>
             </div>
-            <div className="service-card fade-up visible" style={{ transitionDelay: '0.2s' }}>
-              <div className="service-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+
+            <div className="pricing-card fade-up visible" style={{ transitionDelay: '0.2s' }}>
+              <div className="pricing-card-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
               </div>
-              <h3>Limpeza de Vidros para Supermercados e Shoppings</h3>
-              <p>Garantimos vidros extremamente limpos em montras de shoppings, balcões refrigerados e portas de entrada de supermercados, valorizando a apresentação e visibilidade dos seus produtos.</p>
+              <h3 className="pricing-card-name">Apartamento T3 / Moradia</h3>
+              <p className="pricing-card-subtitle">Interior + exterior, superfície maior</p>
+              <span className="pricing-badge">1ª Visita</span>
+              <div className="pricing-first-price">€68</div>
+              <p className="pricing-regular-price">Depois: €85 / visita</p>
+              <a href="#calculator" className="btn btn-primary">Agendar agora</a>
             </div>
+
+            <div className="pricing-card pricing-card--commercial fade-up visible" style={{ transitionDelay: '0.3s' }}>
+              <div className="pricing-card-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              </div>
+              <h3 className="pricing-card-name">Montra / Vidros de Loja</h3>
+              <p className="pricing-card-subtitle">Contrato semanal recorrente, por visita</p>
+              <span className="pricing-badge">1ª Visita</span>
+              <div className="pricing-first-price">a partir de €16</div>
+              <p className="pricing-regular-price">Depois: a partir de €20 / visita</p>
+              <a href="#calculator" className="btn btn-primary">Agendar agora</a>
+            </div>
+          </div>
+
+          <div className="pricing-trust-line fade-up visible">
+            <p>Orçamento gratuito para moradias grandes ou edifícios de condomínio.</p>
+            <a href="https://wa.me/351927322095" target="_blank" rel="noopener noreferrer">→ Pedir orçamento</a>
           </div>
         </div>
       </section>
@@ -105,8 +142,8 @@ export default function Home() {
               <div className="process-image step-1"></div>
               <div className="process-content">
                 <div className="step-number">1</div>
-                <h3>Insira o Número de Janelas</h3>
-                <p>Informe a quantidade de vidros e janelas que deseja limpar no nosso simulador abaixo para ver instantaneamente a sua poupança e preços.</p>
+                <h3>Escolha o Tipo de Imóvel</h3>
+                <p>Selecione o seu tipo de imóvel no nosso simulador abaixo — T1, T2, T3 ou montra — e veja instantaneamente o preço da sua limpeza.</p>
                 <a href="#calculator" className="btn btn-outline">Simular Agora</a>
               </div>
             </div>
@@ -115,7 +152,7 @@ export default function Home() {
               <div className="process-content">
                 <div className="step-number">2</div>
                 <h3>Escolha e Agende</h3>
-                <p>Selecione o tipo de ambiente (residência, escritório, supermercado ou shopping) e reserve o horário ideal. Certifique-se de estar em casa no dia agendado para receber o profissional.</p>
+                <p>Reserve o horário ideal diretamente no nosso calendário online. Certifique-se de estar em casa no dia agendado para receber o profissional.</p>
                 <a href="#calendar" className="btn btn-outline">Ir para o Calendário</a>
               </div>
             </div>
