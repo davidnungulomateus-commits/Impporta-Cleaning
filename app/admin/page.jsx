@@ -26,6 +26,14 @@ export default function AdminCalendarPage() {
   const [isGeneratingPayment, setIsGeneratingPayment] = useState(false);
 
   const [isSyncing, setIsSyncing] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 4000);
+  };
 
   const fetchBookingsData = async () => {
     const { data, error } = await supabase
@@ -115,10 +123,10 @@ export default function AdminCalendarPage() {
         if (selectedBooking && selectedBooking.id === id) {
           setSelectedBooking(null);
         }
-        alert('Agendamento eliminado permanentemente!');
+        showToast('Agendamento eliminado permanentemente!', 'success');
       } else {
         console.error(error);
-        alert('Erro ao eliminar: ' + error.message);
+        showToast('Erro ao eliminar: ' + error.message, 'error');
       }
     }
   };
@@ -130,10 +138,10 @@ export default function AdminCalendarPage() {
       if (selectedBooking && selectedBooking.id === id) {
         setSelectedBooking(null); // Fechar a janela modal para o utilizador ver que desapareceu
       }
-      alert('Agendamento cancelado com sucesso!');
+      showToast('Agendamento atualizado com sucesso!', 'success');
     } else {
       console.error(error);
-      alert('Erro ao cancelar: ' + error.message);
+      showToast('Erro ao atualizar: ' + error.message, 'error');
     }
   };
 
@@ -165,7 +173,7 @@ export default function AdminCalendarPage() {
       }
     } catch (err) {
       console.error("Payment error:", err);
-      alert("Erro ao gerar pagamento.");
+      showToast("Erro ao gerar pagamento.", "error");
       setPaymentAction(null);
     }
     setIsGeneratingPayment(false);
@@ -206,6 +214,13 @@ export default function AdminCalendarPage() {
       <style dangerouslySetInnerHTML={{ __html: `
         .navbar, footer { display: none !important; }
         body { margin: 0; padding: 0; }
+        @keyframes toastFadeIn {
+          from { opacity: 0; transform: translateY(20px) scale(0.95); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .admin-toast {
+          animation: toastFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
       `}} />
       
       {/* Top Navbar for Admin */}
@@ -614,7 +629,7 @@ export default function AdminCalendarPage() {
                       onSuccess={() => {
                         handleUpdateBooking(selectedBooking.id, 'status', 'paid');
                         setPaymentAction(null);
-                        alert("Pagamento concluído com sucesso!");
+                        showToast("Pagamento concluído com sucesso!", "success");
                       }} 
                     />
                   </Elements>
@@ -630,7 +645,7 @@ export default function AdminCalendarPage() {
                     value={adminPaymentLink} 
                     readOnly 
                     style={{ width: '100%', padding: '8px', fontSize: '0.85rem', border: '1px solid #cbd5e1', borderRadius: '4px', backgroundColor: '#fff' }} 
-                    onClick={(e) => { e.target.select(); navigator.clipboard.writeText(e.target.value); alert('Link copiado!'); }}
+                    onClick={(e) => { e.target.select(); navigator.clipboard.writeText(e.target.value); showToast('Link copiado!', 'info'); }}
                   />
                   <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
                     <button 
@@ -790,7 +805,7 @@ export default function AdminCalendarPage() {
                   <label style={{ color: '#166534', marginBottom: '8px', display: 'block' }}>Número MBWay para Cobrança</label>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <input type="text" className="form-input" placeholder="Ex: 912345678" style={{ flex: 1, padding: '8px' }} onChange={e => setNewBookingData({...newBookingData, mbway_phone: e.target.value})} />
-                    <button className="btn" style={{ backgroundColor: '#22c55e', color: 'white', padding: '8px 12px' }} onClick={() => alert('Pedido MBWay será enviado para: ' + (newBookingData.mbway_phone || '...'))}>Gerar Pedido</button>
+                    <button className="btn" style={{ backgroundColor: '#22c55e', color: 'white', padding: '8px 12px' }} onClick={() => showToast('Pedido MBWay será enviado para: ' + (newBookingData.mbway_phone || '...'), 'info')}>Gerar Pedido</button>
                   </div>
                 </div>
               )}
@@ -818,6 +833,30 @@ export default function AdminCalendarPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+      {/* Toast Notification */}
+      {toast && (
+        <div 
+          className="admin-toast"
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            backgroundColor: toast.type === 'success' ? '#10b981' : toast.type === 'error' ? '#ef4444' : '#3b82f6',
+            color: 'white',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            zIndex: 9999,
+            fontWeight: '600',
+            fontSize: '0.9rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+        >
+          {toast.type === 'success' ? '✅' : toast.type === 'error' ? '❌' : 'ℹ️'} {toast.message}
         </div>
       )}
     </main>
