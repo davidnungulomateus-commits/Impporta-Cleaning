@@ -261,6 +261,18 @@ export default function BookingWidget() {
     setStep(2);
   };
 
+  const handleContinueToStep3 = () => {
+    if (!formData.name.trim() || !formData.phone.trim() || !formData.street.trim() || !formData.postal.trim()) {
+      showError("Por favor, preencha todos os campos obrigatórios (*).");
+      return;
+    }
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      showError("Por favor, introduza um endereço de email válido.");
+      return;
+    }
+    setStep(3);
+  };
+
   const handleGoogleLogin = async () => {
     // Save state before redirecting
     sessionStorage.setItem('impporta_booking_state', JSON.stringify({
@@ -488,7 +500,7 @@ export default function BookingWidget() {
                   </form>
                   <div className="step-actions" style={{ marginTop: '32px', display: 'flex', justifyContent: 'space-between' }}>
                     <button type="button" className="btn btn-outline" onClick={() => setStep(1)}>Voltar</button>
-                    <button type="button" className="btn btn-primary" onClick={() => setStep(3)}>Prosseguir para Pagamento</button>
+                    <button type="button" className="btn btn-primary" onClick={handleContinueToStep3}>Prosseguir para Pagamento</button>
                   </div>
                 </div>
               )}
