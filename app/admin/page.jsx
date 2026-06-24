@@ -102,8 +102,12 @@ export default function AdminCalendarPage() {
     if (!error) {
       setBookings(prev => prev.map(b => b.id === id ? { ...b, [field]: value } : b));
       if (selectedBooking && selectedBooking.id === id) {
-        setSelectedBooking(prev => ({ ...prev, [field]: value }));
+        setSelectedBooking(null); // Fechar a janela modal para o utilizador ver que desapareceu
       }
+      alert('Agendamento cancelado com sucesso!');
+    } else {
+      console.error(error);
+      alert('Erro ao cancelar: ' + error.message);
     }
   };
 
