@@ -25,6 +25,28 @@ export default function AdminCalendarPage() {
   const [adminPaymentLink, setAdminPaymentLink] = useState('');
   const [isGeneratingPayment, setIsGeneratingPayment] = useState(false);
 
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const fetchBookingsData = async () => {
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .order('service_date', { ascending: true })
+      .order('service_time', { ascending: true });
+
+    if (!error && data) {
+      setBookings(data);
+    } else {
+      setBookings([]);
+    }
+  };
+
+  const handleSync = async () => {
+    setIsSyncing(true);
+    await fetchBookingsData();
+    setIsSyncing(false);
+  };
+
   useEffect(() => {
     const fetchAdminData = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -36,19 +58,7 @@ export default function AdminCalendarPage() {
       }
       
       setUser(session.user);
-
-      // Fetch all bookings
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .order('service_date', { ascending: true })
-        .order('service_time', { ascending: true });
-
-      if (!error && data) {
-        setBookings(data);
-      } else {
-        setBookings([]);
-      }
+      await fetchBookingsData();
       setLoading(false);
     };
 
@@ -93,6 +103,22 @@ export default function AdminCalendarPage() {
       setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'pending' } : b));
       if (selectedBooking && selectedBooking.id === id) {
         setSelectedBooking(prev => ({ ...prev, status: 'pending' }));
+      }
+    }
+  };
+
+  const handleDeleteForever = async (id) => {
+    if (confirm('Tem a certeza que deseja eliminar permanentemente este agendamento? Esta ação não pode ser desfeita.')) {
+      const { error } = await supabase.from('bookings').delete().eq('id', id);
+      if (!error) {
+        setBookings(prev => prev.filter(b => b.id !== id));
+        if (selectedBooking && selectedBooking.id === id) {
+          setSelectedBooking(null);
+        }
+        alert('Agendamento eliminado permanentemente!');
+      } else {
+        console.error(error);
+        alert('Erro ao eliminar: ' + error.message);
       }
     }
   };
@@ -190,6 +216,14 @@ export default function AdminCalendarPage() {
         </div>
         <div className="admin-nav-actions">
           <span className="admin-user">{user?.email}</span>
+          <button 
+            onClick={handleSync} 
+            className="btn btn-outline" 
+            style={{ padding: '8px 16px', fontSize: '0.85rem', marginRight: '8px', cursor: 'pointer' }}
+            disabled={isSyncing}
+          >
+            {isSyncing ? '🔄 Sincronizando...' : '🔄 Sincronizar'}
+          </button>
           <Link href="/dashboard" className="btn btn-outline" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>Voltar ao Dashboard</Link>
         </div>
       </nav>
@@ -276,12 +310,37 @@ export default function AdminCalendarPage() {
             <h3 style={{ color: '#ef4444' }}>Agendamentos Cancelados</h3>
             <ul className="summary-list">
               {cancelledBookings.map(b => (
-                <li key={`canc-${b.id}`} onClick={() => setSelectedBooking(b)}>
-                  <div className="sum-time">{new Date(b.service_date).toLocaleDateString('pt-PT')}</div>
-                  <div className="sum-details">
-                    <span className="sum-name" style={{ color: '#ef4444', textDecoration: 'line-through' }}>{b.customer_name}</span>
-                    <span className="sum-loc">{b.city}</span>
+                <li key={`canc-${b.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', paddingRight: '8px' }}>
+                  <div onClick={() => setSelectedBooking(b)} style={{ flex: 1, cursor: 'pointer' }}>
+                    <div className="sum-time">{new Date(b.service_date).toLocaleDateString('pt-PT')}</div>
+                    <div className="sum-details">
+                      <span className="sum-name" style={{ color: '#ef4444', textDecoration: 'line-through' }}>{b.customer_name}</span>
+                      <span className="sum-loc">{b.city}</span>
+                    </div>
                   </div>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteForever(b.id);
+                    }}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#ef4444',
+                      cursor: 'pointer',
+                      fontSize: '1.25rem',
+                      padding: '4px 8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'transform 0.2s'
+                    }}
+                    title="Eliminar Permanentemente"
+                    onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
+                    onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  >
+                    🗑️
+                  </button>
                 </li>
               ))}
               {cancelledBookings.length === 0 && <li className="empty-li">Nenhum cancelamento.</li>}
@@ -628,6 +687,25 @@ export default function AdminCalendarPage() {
                 >
                   Cancelar Agendamento
                 </button>
+              )}
+
+              {!paymentAction && selectedBooking.status === 'cancelled' && (
+                <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ flex: 1, fontSize: '0.9rem', padding: '12px', borderRadius: '8px', fontWeight: '600' }}
+                    onClick={() => handleRestoreBooking(selectedBooking.id)}
+                  >
+                    Restaurar Agendamento
+                  </button>
+                  <button 
+                    className="btn" 
+                    style={{ backgroundColor: '#ef4444', borderColor: '#ef4444', color: 'white', flex: 1, fontSize: '0.9rem', padding: '12px', borderRadius: '8px', fontWeight: '600' }}
+                    onClick={() => handleDeleteForever(selectedBooking.id)}
+                  >
+                    Eliminar Permanentemente
+                  </button>
+                </div>
               )}
             </div>
           </div>
